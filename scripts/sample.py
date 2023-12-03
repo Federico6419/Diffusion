@@ -143,7 +143,7 @@ def main():
                     out_path,
                     nrow=1,
                     normalize=True,
-                    range=(-1, 1),
+                    #range=(-1, 1),
                 )
 
             count += 1
