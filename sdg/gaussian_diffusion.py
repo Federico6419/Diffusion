@@ -486,6 +486,9 @@ class GaussianDiffusion:
         :return: a non-differentiable batch of samples.
         """
         final = None
+        ###########
+        j = 0
+        ###########
         for sample in self.p_sample_loop_progressive(
             model,
             shape,
@@ -498,20 +501,21 @@ class GaussianDiffusion:
             progress=progress,
         ):
             final = sample
-        ##################
-        import os
-        from torchvision import utils
-        for i in range(8):
-                path = "NewResults/"+str(i)+".png"
-                os.makedirs(os.path.dirname(path), exist_ok=True)
-                utils.save_image(
-                    final["sample"][i].unsqueeze(0),
-                    path,
-                    nrow=1,
-                    normalize=True,
-                    #range=(-1, 1),
-                )
-        ##################
+            ##################
+            import os
+            from torchvision import utils
+            for i in range(8):
+                    path = "NewResults/"+str(j)+"/"+str(i)+".png"
+                    os.makedirs(os.path.dirname(path), exist_ok=True)
+                    utils.save_image(
+                        final["sample"][i].unsqueeze(0),
+                        path,
+                        nrow=1,
+                        normalize=True,
+                        #range=(-1, 1),
+                    )
+            ##################
+            j+=1
         return final["sample"]
 
     def p_sample_loop_progressive(
