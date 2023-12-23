@@ -499,6 +499,7 @@ class GaussianDiffusion:
         ):
             final = sample
         ##################
+        """
         for i in range(8):
                 utils.save_image(
                     sample[i].unsqueeze(0),
@@ -507,6 +508,7 @@ class GaussianDiffusion:
                     normalize=True,
                     #range=(-1, 1),
                 )
+        """
         ##################
         return final["sample"]
 
