@@ -499,16 +499,17 @@ class GaussianDiffusion:
         ):
             final = sample
         ##################
-        """
+        
         for i in range(8):
+                path = "NewResults"
+                os.makedirs(os.path.dirname(path+str(i)+".png"), exist_ok=True)
                 utils.save_image(
                     sample[i].unsqueeze(0),
-                    "/",
+                    path,
                     nrow=1,
                     normalize=True,
                     #range=(-1, 1),
                 )
-        """
         ##################
         return final["sample"]
 
