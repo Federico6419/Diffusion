@@ -137,6 +137,7 @@ def main():
 
                 out_path = os.path.join(args.logdir, out_folder,
                                         f"{str(count * args.batch_size + i).zfill(5)}.png")
+                print(out_path)
                 os.makedirs(os.path.dirname(out_path), exist_ok=True)
                 utils.save_image(
                     sample[i].unsqueeze(0),
