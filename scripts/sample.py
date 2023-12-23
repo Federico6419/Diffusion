@@ -126,6 +126,8 @@ def main():
                     cond_fn=cond_fn,
                     device='cuda',
                 )
+            import plt as p
+            p.imshow(sample)
 
             for i in range(args.batch_size):
                 if args.text_weight == 0:
