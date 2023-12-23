@@ -501,7 +501,7 @@ class GaussianDiffusion:
         ##################
         import os
         for i in range(8):
-                path = "NewResults"
+                path = "NewResults/"
                 os.makedirs(os.path.dirname(path+str(i)+".png"), exist_ok=True)
                 utils.save_image(
                     sample[i].unsqueeze(0),
