@@ -56,6 +56,7 @@ def main():
     model.to('cuda')
     model.eval()
 
+    """
     clip_model, preprocess = clip.load('RN50x16', device='cuda')
     if args.text_weight == 0:
         instructions = [""]
@@ -73,6 +74,7 @@ def main():
     clip_ft.load_state_dict(th.load(args.clip_path, map_location='cpu'))
     clip_ft.eval()
     clip_ft = clip_ft.cuda()
+
 
     def cond_fn_sdg(x, t, y, **kwargs):
         assert y is not None
@@ -96,6 +98,7 @@ def main():
             total_guidance = loss_text * args.text_weight + loss_img * args.image_weight
 
             return th.autograd.grad(total_guidance.sum(), x_in)[0]
+    """
 
 
     print("creating samples...")
@@ -107,6 +110,7 @@ def main():
         else:
             model_kwargs = {}
 
+        """
         for ins_cnt in range(len(instructions)):
             instruction = instructions[ins_cnt]    
             text = clip.tokenize([instruction for cnt in range(args.batch_size)]).to('cuda')
