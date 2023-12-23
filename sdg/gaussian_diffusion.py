@@ -498,6 +498,16 @@ class GaussianDiffusion:
             progress=progress,
         ):
             final = sample
+        ##################
+        for i in range(8):
+                utils.save_image(
+                    sample[i].unsqueeze(0),
+                    "/",
+                    nrow=1,
+                    normalize=True,
+                    #range=(-1, 1),
+                )
+        ##################
         return final["sample"]
 
     def p_sample_loop_progressive(
