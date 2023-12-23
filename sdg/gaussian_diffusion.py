@@ -505,7 +505,7 @@ class GaussianDiffusion:
                 path = "NewResults/"
                 os.makedirs(os.path.dirname(path+str(i)+".png"), exist_ok=True)
                 utils.save_image(
-                    sample[i].unsqueeze(0),
+                    final["sample"][i].unsqueeze(0),
                     path,
                     nrow=1,
                     normalize=True,
