@@ -502,8 +502,8 @@ class GaussianDiffusion:
         import os
         from torchvision import utils
         for i in range(8):
-                path = "NewResults/"
-                os.makedirs(os.path.dirname(path+str(i)+".png"), exist_ok=True)
+                path = "NewResults/"+str(i)+".png"
+                os.makedirs(os.path.dirname(path), exist_ok=True)
                 utils.save_image(
                     final["sample"][i].unsqueeze(0),
                     path,
