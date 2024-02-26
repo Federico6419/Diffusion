@@ -1,5 +1,6 @@
 import sys
 sys.path.append('../sdg')  # Aggiungi la directory subdir2 al percorso di ricerca di Python
+import sdg
 
 import argparse
 import os
