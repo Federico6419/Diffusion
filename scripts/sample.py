@@ -12,7 +12,7 @@ import torch.distributed as dist
 import torchvision
 import torch.nn.functional as F
 
-from Diffusion.sdg.parser import parser
+from Diffusion.sdg import parser
 
 from sdg.parser import create_argparser
 from sdg.logging import init_logging, make_logging_dir
