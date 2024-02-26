@@ -1,7 +1,7 @@
 import sys
  
 # adding Folder_2 to the system path
-sys.path.insert(0, '/Diffusion/sdg')
+sys.path.insert(0, 'Diffusion/sdg')
 
 import argparse
 import os
