@@ -1,5 +1,7 @@
-#import sys
-#sys.path.append('./Diffusion/sdg')  # Aggiungi la directory subdir2 al percorso di ricerca di Python
+import sys
+ 
+# adding Folder_2 to the system path
+sys.path.insert(0, '/Diffusion/sdg')
 
 import argparse
 import os
@@ -11,8 +13,6 @@ import torch as th
 import torch.distributed as dist
 import torchvision
 import torch.nn.functional as F
-
-from Diffusion.sdg import parser
 
 from sdg.parser import create_argparser
 from sdg.logging import init_logging, make_logging_dir
