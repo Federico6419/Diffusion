@@ -64,7 +64,6 @@ import matplotlib.pyplot as plt
 from shutil import copyfile
 import IPython.display as IPython_display
 
-from pytorch_fid.fid_score import calculate_fid_given_paths
 os.environ["HDF5_USE_FILE_LOCKING"] = "FALSE"
 
 from resnet_classifier import ResNet
