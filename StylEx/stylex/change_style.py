@@ -1,3 +1,4 @@
+import os
 import sys
 import h5py
 import numpy as np
@@ -29,7 +30,7 @@ import matplotlib.pyplot as plt
 from shutil import copyfile
 import IPython.display as IPython_display
 
-#os.environ["HDF5_USE_FILE_LOCKING"] = "FALSE"
+os.environ["HDF5_USE_FILE_LOCKING"] = "FALSE"
 
 from resnet_classifier import ResNet
 
