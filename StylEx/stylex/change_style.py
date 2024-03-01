@@ -49,28 +49,28 @@ shift_size = 1
 threshold_index = 101
 
 if model_to_use == "plant":
-    stylex_path = "../../drive/MyDrive/StylEx/models/old_plant_mobilenet/model_260.pt"
+    stylex_path = "../pretrained_stylex/models/old_plant_mobilenet/model_260.pt"
     data = "../data/plant_village/all" # Plant dataset
-    classifier_name = "../../drive/MyDrive/StylEx/trained_classifiers/mobilenet-64px-plant.pt" # Only use mobilenet for plants
-    hf = h5py.File("../../drive/MyDrive/StylEx/precomputed_attfind_files/style_change_records_old_plants.hdf5", 'r')
+    classifier_name = "../pretrained_stylex/trained_classifiers/mobilenet-64px-plant.pt" # Only use mobilenet for plants
+    hf = h5py.File("../pretrained_stylex/precomputed_attfind_files/style_change_records_old_plants.hdf5", 'r')
     threshold_index = 101
     shift_size = 2
     USE_OLD_ARCHITECTURE = True
 
 elif model_to_use == "faces_old":
-    stylex_path = "../../drive/MyDrive/StylEx/models/old_faces_gender_mobilenet/model_134.pt"
+    stylex_path = "../pretrained_stylex/models/old_faces_gender_mobilenet/model_134.pt"
     data = "../data/Kaggle_FFHQ_Resized_256px/flickrfaceshq-dataset-nvidia-resized-256px/resized" # FFHQ faces dataset
-    classifier_name = "../../drive/MyDrive/StylEx/trained_classifiers/resnet-18-64px-gender.pt"  # Use ResNet for all the gender related ones, even the one trained on mobilenet
-    hf = h5py.File("../../drive/MyDrive/StylEx/precomputed_attfind_files/style_change_records_old_faces.hdf5", 'r')
+    classifier_name = "../pretrained_stylex/trained_classifiers/resnet-18-64px-gender.pt"  # Use ResNet for all the gender related ones, even the one trained on mobilenet
+    hf = h5py.File("../pretrained_stylex/precomputed_attfind_files/style_change_records_old_faces.hdf5", 'r')
     threshold_index = 101
     shift_size = 2
     USE_OLD_ARCHITECTURE = True
 
 elif model_to_use == "faces_new":
-    stylex_path = "../../drive/MyDrive/StylEx/models/new_faces_gender_resnet/model_300.pt"
+    stylex_path = "../pretrained_stylex/models/new_faces_gender_resnet/model_300.pt"
     data = "../data/Kaggle_FFHQ_Resized_256px/flickrfaceshq-dataset-nvidia-resized-256px/resized" # FFHQ faces dataset
-    classifier_name = "../../drive/MyDrive/StylEx/trained_classifiers/resnet-18-64px-gender.pt"  # Use ResNet for all the gender related ones, even the one trained on mobilenet
-    hf = h5py.File("../../drive/MyDrive/StylEx/precomputed_attfind_files/style_change_records_new_faces.hdf5", 'r')
+    classifier_name = "../pretrained_stylex/trained_classifiers/resnet-18-64px-gender.pt"  # Use ResNet for all the gender related ones, even the one trained on mobilenet
+    hf = h5py.File("../pretrained_stylex/precomputed_attfind_files/style_change_records_new_faces.hdf5", 'r')
     threshold_index = 501
     shift_size = 1
     USE_OLD_ARCHITECTURE = False
