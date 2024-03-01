@@ -30,6 +30,14 @@ from torchvision import utils
 import math
 import clip
 
+################
+import sys
+sys.path.append('StylEx/stylex')
+
+# Ora puoi importare la funzione dal modulo
+from changestyle import create_latent
+################
+
 
 def main():
     time0 = time.time()
@@ -84,6 +92,7 @@ def main():
                 target_img_features = clip_ft.encode_image_list(target_img_noised, t)
         with th.enable_grad():
             x_in = x.detach().requires_grad_(True)
+            w_latent = create_latent(x_in)
             image_features = clip_ft.encode_image_list(x_in, t)
             if args.text_weight != 0:
                 loss_text = text_loss(image_features, text_features, args)
