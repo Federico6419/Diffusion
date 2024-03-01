@@ -343,12 +343,34 @@ def get_images(dlatent,
     return generated_image, changed_image, style_coords, style_coords2
 
 
+def create_latent(image):
+  dataset = torch.utils.data.TensorDataset(image)
+  dataloader = DataLoader(dataset, batch_size=1, shuffle=False)
+  
+  StylEx = StylEx(image_size = 64)
+  StylEx.load_state_dict(torch.load("/content/drive/MyDrive/StylEx/models/old_faces_gender_mobilenet/model_134.pt")["StylEx"])#load the weight for the generator
+
+  for image in data_loader:
+      image=image.to('cuda')
+      encoder_output = StylEx.encoder(image)
+      real_classified_logits = classifier.classify_images(image)
+      style = [(torch.cat((encoder_output, real_classified_logits), dim=1),
+                StylEx.G.num_layers)]  # Has to be bracketed because expects a noise mix
+      noise = image_noise(1, 1, device=0)
+    
+      w_styles = styles_def_to_tensor(style)
+
+  return w_styles
+
+
 
 
 
 #GENERATORE CON UN SOLO ATTRIBUTO
 
-def change_image(attribute_number, image_number):
+def change_image(attribute_number, image):
+  
+    
   indices_and_signs = np.array([s_indices_and_signs[0]] + [s_indices_and_signs[1]] + [s_indices_and_signs[2], s_indices_and_signs[3]])
 
   direction_index, style_index = indices_and_signs[attribute_number]
@@ -366,7 +388,7 @@ def change_image(attribute_number, image_number):
   torch.set_printoptions(threshold=10_000)
   #print(d-c)
 
-
+  """
   fig, axes = plt.subplots(1, 2)
   image_np = a.squeeze().permute(1, 2, 0).cpu().numpy()
   axes[0].imshow(image_np)
@@ -375,8 +397,4 @@ def change_image(attribute_number, image_number):
   axes[1].imshow(image_np2)
   axes[1].axis('off')
   plt.show()
-
-
-
-def create_new_image(image):
-  #change_image(attribute_number, image):
+  """
