@@ -352,7 +352,7 @@ def create_latent(image):
   #StylEx = StylEx(image_size = 64)
   #StylEx.load_state_dict(torch.load("/content/drive/MyDrive/StylEx/models/old_faces_gender_mobilenet/model_134.pt")["StylEx"])#load the weight for the generator
 
-  for image in data_loader:
+  for image in dataloader:
       image=image.to('cuda')
       encoder_output = stylex.encoder(image)
       real_classified_logits = classifier.classify_images(image)
