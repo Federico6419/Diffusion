@@ -344,15 +344,34 @@ def get_images(dlatent,
 
     return generated_image, changed_image, style_coords, style_coords2
 
+class CustomDataset(Dataset):
+    def __init__(self, image_list, transform=None):
+        self.image_list = image_list
+        self.transform = transform
+
+    def __len__(self):
+        return len(self.image_list)
+
+    def __getitem__(self, idx):
+        image = self.image_list[idx]
+        if self.transform:
+            image = self.transform(image)
+        return image
 
 def create_latent(image):
   from torchvision import transforms
   transform = transforms.Compose([
-    transforms.Resize((64, 64))
+    transforms.Resize((64, 64)),  # Ridimensiona le immagini a 64x64
+    transforms.ToTensor()  # Converte le immagini in tensori
   ])
+
+  custom_dataset = CustomDataset(image, transform=transform)
+
+  batch_size = 8
+  data_loader = DataLoader(custom_dataset, batch_size=batch_size, shuffle=True)
     
-  dataset = torch.utils.data.TensorDataset(image)
-  dataloader = DataLoader(dataset, batch_size=1, shuffle=False)
+  #dataset = torch.utils.data.TensorDataset(image)
+  #dataloader = DataLoader(dataset, batch_size=8, shuffle=False, transform=transform)
   
   #StylEx = StylEx(image_size = 64)
   #StylEx.load_state_dict(torch.load("/content/drive/MyDrive/StylEx/models/old_faces_gender_mobilenet/model_134.pt")["StylEx"])#load the weight for the generator
