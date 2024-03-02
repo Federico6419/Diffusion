@@ -362,7 +362,6 @@ def create_latent(image):
   from torchvision import transforms
   transform = transforms.Compose([
     transforms.Resize((64, 64)),  # Ridimensiona le immagini a 64x64
-    transforms.ToTensor()  # Converte le immagini in tensori
   ])
 
   custom_dataset = CustomDataset(image, transform=transform)
