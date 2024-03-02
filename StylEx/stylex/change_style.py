@@ -368,7 +368,7 @@ def create_latent(image):
   custom_dataset = CustomDataset(image, transform=transform)
 
   batch_size = 8
-  data_loader = DataLoader(custom_dataset, batch_size=batch_size, shuffle=True)
+  dataloader = DataLoader(custom_dataset, batch_size=batch_size, shuffle=True)
     
   #dataset = torch.utils.data.TensorDataset(image)
   #dataloader = DataLoader(dataset, batch_size=8, shuffle=False, transform=transform)
