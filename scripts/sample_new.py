@@ -93,6 +93,7 @@ def main():
         with th.enable_grad():
             x_in = x.detach().requires_grad_(True)
             w_latent = create_latent(x_in)
+            print("LATENTE "+w_latent)
             image_features = clip_ft.encode_image_list(x_in, t)
             if args.text_weight != 0:
                 loss_text = text_loss(image_features, text_features, args)
