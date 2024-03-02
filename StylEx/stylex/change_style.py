@@ -380,7 +380,7 @@ def create_latent(image):
       encoder_output = stylex.encoder(image)
       real_classified_logits = classifier.classify_images(image)
       style = [(torch.cat((encoder_output, real_classified_logits), dim=1),
-                StylEx.G.num_layers)]  # Has to be bracketed because expects a noise mix
+                stylex.G.num_layers)]  # Has to be bracketed because expects a noise mix
       noise = image_noise(1, 1, device=0)
     
       w_styles = styles_def_to_tensor(style)
