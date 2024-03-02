@@ -62,7 +62,7 @@ elif model_to_use == "faces_old":
     stylex_path = "StylEx/pretrained_stylex/models/old_faces_gender_mobilenet/model_134.pt"
     data = "StylEx/data/Kaggle_FFHQ_Resized_256px/flickrfaceshq-dataset-nvidia-resized-256px/resized" # FFHQ faces dataset
     classifier_name = "StylEx/pretrained_stylex/trained_classifiers/resnet-18-64px-gender.pt"  # Use ResNet for all the gender related ones, even the one trained on mobilenet
-    hf = h5py.File("StylEx/pretrained_stylex/precomputed_attfind_files/style_change_records_old_faces.hdf5", 'r')
+    hf = h5py.File("AStylEx/pretrained_stylex/precomputed_attfind_files/style_change_records_old_faces.hdf5", 'r')
     threshold_index = 101
     shift_size = 2
     USE_OLD_ARCHITECTURE = True
