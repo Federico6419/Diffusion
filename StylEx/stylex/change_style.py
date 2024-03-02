@@ -346,6 +346,7 @@ def get_images(dlatent,
 
 
 def create_latent(image):
+  print(image)
   dataset = torch.utils.data.TensorDataset(image)
   dataloader = DataLoader(dataset, batch_size=1, shuffle=False)
   
