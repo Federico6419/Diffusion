@@ -349,12 +349,12 @@ def create_latent(image):
   dataset = torch.utils.data.TensorDataset(image)
   dataloader = DataLoader(dataset, batch_size=1, shuffle=False)
   
-  StylEx = StylEx(image_size = 64)
-  StylEx.load_state_dict(torch.load("/content/drive/MyDrive/StylEx/models/old_faces_gender_mobilenet/model_134.pt")["StylEx"])#load the weight for the generator
+  #StylEx = StylEx(image_size = 64)
+  #StylEx.load_state_dict(torch.load("/content/drive/MyDrive/StylEx/models/old_faces_gender_mobilenet/model_134.pt")["StylEx"])#load the weight for the generator
 
   for image in data_loader:
       image=image.to('cuda')
-      encoder_output = StylEx.encoder(image)
+      encoder_output = stylex.encoder(image)
       real_classified_logits = classifier.classify_images(image)
       style = [(torch.cat((encoder_output, real_classified_logits), dim=1),
                 StylEx.G.num_layers)]  # Has to be bracketed because expects a noise mix
