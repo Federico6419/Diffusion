@@ -346,9 +346,11 @@ def get_images(dlatent,
 
 
 def create_latent(image):
-  print(image)
-  print(image.size())
-  print(image.shape())
+  from torchvision import transforms
+  transform = transforms.Compose([
+    transforms.Resize((64, 64))
+  )]
+    
   dataset = torch.utils.data.TensorDataset(image)
   dataloader = DataLoader(dataset, batch_size=1, shuffle=False)
   
