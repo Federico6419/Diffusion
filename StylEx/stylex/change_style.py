@@ -405,16 +405,16 @@ def change_image(attribute_number, image):
   else:
       style_direction = direction_index       #Direction 0 diventa più maschio, Direction 1 diventa più donna
 
-  embeddings = []
+  new_images = []
 
   for t in image:
     image_original, image_modified, style_coord1, style_coord2 = get_images(dlatent=t[-1], generator=stylex.G, classifier=classifier, sindex=style_index, s_style_min=style_min[style_index], s_style_max=style_max[style_index],
                   style_direction_index=style_direction, shift_size=shift_size, label_size=2, noise=saved_noise, cuda_rank=cuda_rank)
     #torch.set_printoptions(threshold=10_000)
     #print(d-c)
-    embeddings.append(image_modified)
+    new_images.append(image_modified)
 
-  embeddings = create_latent(embeddings)
+  embeddings = create_latent(new_images)
 
   return embeddings
   
