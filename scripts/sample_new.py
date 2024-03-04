@@ -95,8 +95,8 @@ def main():
             x_in = x.detach().requires_grad_(True)
             w_latent_batch = create_latent(x_in)
             w_latent_batch_generated = change_image(1, w_latent_batch)
-            print(w_latent_batch_generated)
-            print(w_latent_batch_generated.shape())
+            #print(w_latent_batch_generated)
+            #print(w_latent_batch_generated.shape())
             #print("LATENT")
             #print(w_latent)
             image_features = clip_ft.encode_image_list(x_in, t)
@@ -105,7 +105,7 @@ def main():
             else:
                 loss_text = 0
             if args.image_weight != 0:
-                loss_img = image_loss(image_features, target_img_features, args)
+                loss_img = image_loss(w_latent_batch, w_latent_batch_generated, args)
             else:
                 loss_img = 0
             total_guidance = loss_text * args.text_weight + loss_img * args.image_weight
