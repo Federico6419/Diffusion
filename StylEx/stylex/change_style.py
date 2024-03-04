@@ -390,11 +390,9 @@ def create_latent(image):
 
 
 
-
 #GENERATORE CON UN SOLO ATTRIBUTO
 
 def change_image(attribute_number, image):
-  
     
   indices_and_signs = np.array([s_indices_and_signs[0]] + [s_indices_and_signs[1]] + [s_indices_and_signs[2], s_indices_and_signs[3]])
 
@@ -407,11 +405,19 @@ def change_image(attribute_number, image):
   else:
       style_direction = direction_index       #Direction 0 diventa più maschio, Direction 1 diventa più donna
 
+  embeddings = []
 
-  a, b, c, d = get_images(dlatent=W_values[image_number], generator=stylex.G, classifier=classifier, sindex=style_index, s_style_min=style_min[style_index], s_style_max=style_max[style_index],
+  for t in image:
+    image_original, image_modified, style_coord1, style_coord2 = get_images(dlatent=t, generator=stylex.G, classifier=classifier, sindex=style_index, s_style_min=style_min[style_index], s_style_max=style_max[style_index],
                   style_direction_index=style_direction, shift_size=shift_size, label_size=2, noise=saved_noise, cuda_rank=cuda_rank)
-  torch.set_printoptions(threshold=10_000)
-  #print(d-c)
+    #torch.set_printoptions(threshold=10_000)
+    #print(d-c)
+    embeddings.append(image_modified)
+
+  embeddings = create_latent(embeddings)
+
+  return embeddings
+  
 
   """
   fig, axes = plt.subplots(1, 2)
