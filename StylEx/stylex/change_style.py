@@ -412,7 +412,10 @@ def change_image(attribute_number, image):
                   style_direction_index=style_direction, shift_size=shift_size, label_size=2, noise=saved_noise, cuda_rank=cuda_rank)
     #torch.set_printoptions(threshold=10_000)
     #print(d-c)
+    image_modified = image_modified.squeeze()#.permute(1, 2, 0)
     new_images.append(image_modified)
+
+  new_images= torch.stack(new_images, dim=0).squeeze(1)  
 
   embeddings = create_latent(new_images)
 
