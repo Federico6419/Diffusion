@@ -20,7 +20,6 @@ def gram_matrix(input):
     else:
         return result
 
-"""
 def image_loss(source, target, args):
     if args.image_loss == 'semantic':
         source[-1] = source[-1] / source[-1].norm(dim=-1, keepdim=True)
@@ -32,12 +31,6 @@ def image_loss(source, target, args):
         for cnt in range(5):
             loss += F.mse_loss(gram_matrix(source[cnt]), gram_matrix(target[cnt]))
         return -loss * 1e10 / sum(weights)
-"""
-
-def image_loss(source, target, args):
-    source = source / source.norm(dim=-1, keepdim=True)
-    target = target / target.norm(dim=-1, keepdim=True)
-    return (source * target).sum(1)
 
 def text_loss(source, target, args):
     source_feat = source[-1] / source[-1].norm(dim=-1, keepdim=True)
