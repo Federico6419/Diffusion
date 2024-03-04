@@ -95,10 +95,6 @@ def main():
             x_in = x.detach().requires_grad_(True)
             w_latent_batch = create_latent(x_in)
             w_latent_batch_generated = change_image(1, w_latent_batch)
-            #print(w_latent_batch_generated)
-            #print(w_latent_batch_generated.shape())
-            #print("LATENT")
-            #print(w_latent)
             #image_features = clip_ft.encode_image_list(x_in, t)
             #if args.text_weight != 0:
             #    loss_text = text_loss(image_features, text_features, args)
