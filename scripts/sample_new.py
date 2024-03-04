@@ -99,11 +99,12 @@ def main():
             #print(w_latent_batch_generated.shape())
             #print("LATENT")
             #print(w_latent)
-            image_features = clip_ft.encode_image_list(x_in, t)
-            if args.text_weight != 0:
-                loss_text = text_loss(image_features, text_features, args)
-            else:
-                loss_text = 0
+            #image_features = clip_ft.encode_image_list(x_in, t)
+            #if args.text_weight != 0:
+            #    loss_text = text_loss(image_features, text_features, args)
+            #else:
+            #    loss_text = 0
+            loss_text = 0
             if args.image_weight != 0:
                 loss_img = image_loss(w_latent_batch, w_latent_batch_generated, args)
             else:
