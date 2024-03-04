@@ -92,9 +92,10 @@ def main():
                 target_img_features = clip_ft.encode_image_list(target_img_noised, t)
         with th.enable_grad():
             x_in = x.detach().requires_grad_(True)
-            w_latent = create_latent(x_in)
-            print("LATENT")
-            print(w_latent)
+            w_latent_batch = create_latent(x_in)
+            change_image(1, w_latent_batch):
+            #print("LATENT")
+            #print(w_latent)
             image_features = clip_ft.encode_image_list(x_in, t)
             if args.text_weight != 0:
                 loss_text = text_loss(image_features, text_features, args)
