@@ -94,7 +94,9 @@ def main():
         with th.enable_grad():
             x_in = x.detach().requires_grad_(True)
             w_latent_batch = create_latent(x_in)
-            change_image(1, w_latent_batch)
+            w_latent_batch_generated = change_image(1, w_latent_batch)
+            print(w_latent_batch_generated)
+            print(w_latent_batch_generated.shape())
             #print("LATENT")
             #print(w_latent)
             image_features = clip_ft.encode_image_list(x_in, t)
