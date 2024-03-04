@@ -385,6 +385,8 @@ def create_latent(image):
     
       w_styles = styles_def_to_tensor(style)
 
+  w_styles = w_styles[:, -1, :]
+
   return w_styles
 
 
