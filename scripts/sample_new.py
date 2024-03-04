@@ -97,6 +97,9 @@ def main():
             #print("LATENT")
             #print(w_latent)
             image_features = clip_ft.encode_image_list(x_in, t)
+            print(image_features)
+            print(image_features.shape())
+            print(image_features.type())
             if args.text_weight != 0:
                 loss_text = text_loss(image_features, text_features, args)
             else:
