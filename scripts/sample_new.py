@@ -36,6 +36,7 @@ sys.path.append('StylEx/stylex')
 
 # Ora puoi importare la funzione dal modulo
 from change_style import create_latent
+from change_style import change_image
 ################
 
 
