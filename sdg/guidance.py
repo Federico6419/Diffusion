@@ -22,9 +22,9 @@ def gram_matrix(input):
 
 def image_loss(source, target, args):
     if args.image_loss == 'semantic':
-        source[-1] = source[-1] / source[-1].norm(dim=-1, keepdim=True)
-        target[-1] = target[-1] / target[-1].norm(dim=-1, keepdim=True)
-        return (source[-1] * target[-1]).sum(1)
+        source = source / source.norm(dim=-1, keepdim=True)
+        target = target / target.norm(dim=-1, keepdim=True)
+        return (source * target).sum(1)
     elif args.image_loss == 'style':
         weights = [1, 1, 1, 1, 1]
         loss = 0
