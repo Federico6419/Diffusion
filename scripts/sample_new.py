@@ -30,6 +30,15 @@ from torchvision import utils
 import math
 import clip
 
+############
+import sys
+sys.path.append('StylEx256')
+
+# Ora puoi importare la funzione dal modulo
+from change_style import create_latent
+from change_style import change_image
+#######à####
+
 
 def main():
     time0 = time.time()
@@ -84,11 +93,18 @@ def main():
                 target_img_features = clip_ft.encode_image_list(target_img_noised, t)
         with th.enable_grad():
             x_in = x.detach().requires_grad_(True)
-            image_features = clip_ft.encode_image_list(x_in, t)
-            if args.text_weight != 0:
-                loss_text = text_loss(image_features, text_features, args)
-            else:
-                loss_text = 0
+            #image_features = clip_ft.encode_image_list(x_in, t)
+
+            #################
+            w_latent_batch = create_latent(x_in)
+            w_latent_batch_generated = change_image(1, w_latent_batch)
+            loss_text = 0
+            #################
+            
+            #if args.text_weight != 0:
+            #    loss_text = text_loss(image_features, text_features, args)
+            #else:
+            #    loss_text = 0
             if args.image_weight != 0:
                 loss_img = image_loss(image_features, target_img_features, args)
             else:
