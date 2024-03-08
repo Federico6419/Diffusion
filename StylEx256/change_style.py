@@ -27,15 +27,19 @@ torch.manual_seed(0)
 classifier = MobileNetV1()
 classifier.load_state_dict(torch.load(CLASSIFIER_PATH))
 classifier.eval()
+classifier.to('cuda')
 
 generator = load_torch_generator(pth_file=GENERATOR_PATH)
 generator.eval()
+#generator.to('cuda')
 
 encoder = load_torch_encoder(pth_file=ENCODER_PATH)
 encoder.eval()
+#encoder.to('cuda')
 
 discriminator = load_torch_discriminator(pth_file=DISCRIMINATOR_PATH)
 discriminator.eval()
+discriminator.to('cuda')
 print("")
 ####################################
 
@@ -144,7 +148,10 @@ def create_latent(image):
     #logits = classifier(torch.from_numpy(image).unsqueeze(0))
     #logits = classifier(image.unsqueeze(0))
     logits = classifier(image)
-    our_dlat = create_dlat_from_img_and_logits(encoder, logits, image)
+    #our_dlat = create_dlat_from_img_and_logits(encoder, logits, image[0].detach().cpu().numpy())
+    #image = torch.from_numpy(image.detach().cpu().numpy()).unsqueeze(0)
+    enc_out = encoder(image.cpu(), 2)
+    our_dlat = torch.cat([enc_out.to('cuda'), logits], dim=1)
 
   return our_dlat
 #####################################
@@ -152,12 +159,12 @@ def create_latent(image):
 #####################################
 def change_image(attribute_number, lat_images):
   #@title Load the precomputed dlatents (already concatenated to the labels)
-  latents_file = open("./data/saved_dlantents.pkl",'rb')
+  latents_file = open("StylEx256/data/saved_dlantents.pkl",'rb')
   dlatents = pickle.load(latents_file)
   
 
   #@title Load effect data from the tfrecord {form-width: '20%'}
-  data_path = './data/examples_1.tfrecord'
+  data_path = 'StylEx256/data/examples_1.tfrecord'
   num_classes = 2
   print(f'Loaded dataset: {data_path}')
   index_path = None
@@ -196,44 +203,44 @@ def change_image(attribute_number, lat_images):
 
   new_images = []
   
-  for lat in lat_images:
-    expanded_dlatent_tmp = torch.tile(lat.unsqueeze(1),[1, num_layers, 1])
-    svbg, _, _ = generator.synthesis.style_vector_calculator(expanded_dlatent_tmp)
-    result_image = np.zeros((resolution, 2 * resolution, 3), np.uint8)
-    images_out = generator.synthesis.image_given_dlatent(expanded_dlatent_tmp, svbg)
-    images_out = torch.maximum(torch.minimum(images_out, torch.Tensor([1])), torch.Tensor([-1]))
-    result = classifier(images_out)
-    base_image = images_out.permute(0, 2, 3, 1)
-    
-    class_index = 0
-    sindex = attribute_number
-    #sindex = 5300         #Lentiggini
-    #sindex = 3301         #Occhiali
-    #sindex = 3199          #Capelli bianchi
-    #sindex = 3921
-    shift_sign = "1"
-    wsign_index = int(shift_sign)
-    shift_size =  1
-    
-    change_image, change_prob = (
-        generate_change_image_given_dlatent(lat.detach(), generator, classifier,
-                                            class_index, sindex,
-                                            style_min[sindex], style_max[sindex],
-                                            wsign_index, shift_size,
-                                            label_size))
+  #for lat in lat_images:
+  expanded_dlatent_tmp = torch.tile(lat_images.unsqueeze(1),[1, num_layers, 1]).cpu()
+  svbg, _, _ = generator.synthesis.style_vector_calculator(expanded_dlatent_tmp.squeeze(0))
+  result_image = np.zeros((resolution, 2 * resolution, 3), np.uint8)
+  images_out = generator.synthesis.image_given_dlatent(expanded_dlatent_tmp, svbg)
+  images_out = torch.maximum(torch.minimum(images_out, torch.Tensor([1])), torch.Tensor([-1]))
+  result = classifier(images_out.to('cuda'))
+  base_image = images_out.permute(0, 2, 3, 1)
+  
+  class_index = 0
+  sindex = attribute_number
+  #sindex = 5300         #Lentiggini
+  #sindex = 3301         #Occhiali
+  #sindex = 3199          #Capelli bianchi
+  #sindex = 3921
+  shift_sign = "1"
+  wsign_index = int(shift_sign)
+  shift_size =  1
+  
+  change_image, change_prob = (
+      generate_change_image_given_dlatent(lat_images.detach().cpu(), generator, classifier,
+                                          class_index, sindex,
+                                          style_min[sindex], style_max[sindex],
+                                          wsign_index, shift_size,
+                                          label_size))
 
-    new_images.append(change_image)
+  new_images.append(change_image)
 
-    """
-    fig, axes = plt.subplots(1, 2)
-    image_np = base_image[0].detach().numpy()
-    axes[0].imshow(image_np)
-    axes[0].axis('off')
-    image_np2 = change_image[0].detach().numpy()
-    axes[1].imshow(image_np2)
-    axes[1].axis('off')
-    plt.show()
-    """
+  """
+  fig, axes = plt.subplots(1, 2)
+  image_np = base_image[0].detach().numpy()
+  axes[0].imshow(image_np)
+  axes[0].axis('off')
+  image_np2 = change_image[0].detach().numpy()
+  axes[1].imshow(image_np2)
+  axes[1].axis('off')
+  plt.show()
+  """
     
   new_images= torch.stack(new_images, dim=0)#.squeeze(1)  
 
