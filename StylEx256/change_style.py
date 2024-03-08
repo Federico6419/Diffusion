@@ -52,6 +52,50 @@ resolution = 256
 #####################################
 
 #####################################
+#@title Load the precomputed dlatents (already concatenated to the labels)
+latents_file = open("StylEx256/data/saved_dlantents.pkl",'rb')
+dlatents = pickle.load(latents_file)
+
+
+#@title Load effect data from the tfrecord {form-width: '20%'}
+data_path = 'StylEx256/data/examples_1.tfrecord'
+num_classes = 2
+print(f'Loaded dataset: {data_path}')
+index_path = None
+description = {"dlatent": "float", "result": "float", "base_prob": "float"}
+dataset = TFRecordDataset(data_path, index_path, description)
+loader = torch.utils.data.DataLoader(dataset, batch_size=1)
+
+style_change_effect = []
+dlatents = []
+base_probs = []
+for raw_record in iter(loader):
+  dlatents.append(
+      np.array(raw_record['dlatent']))
+  seffect = np.array(
+      raw_record['result']).reshape(
+          (-1, 2, num_classes))
+  style_change_effect.append(seffect.transpose([1, 0, 2]))
+  base_probs.append(
+      np.array(raw_record['base_prob']))
+
+base_probs = np.array(base_probs)
+style_change_effect = np.array(style_change_effect)
+dlatents = torch.from_numpy(np.array(dlatents))
+expanded_dlatent_tmp = torch.tile(dlatents, [1, num_layers, 1])
+W_values, style_change_effect, base_probs = dlatents.squeeze(), style_change_effect.squeeze(), base_probs.squeeze()
+
+style_change_effect = filter_unstable_images(style_change_effect, effect_threshold=2)
+all_style_vectors = torch.cat(generator.synthesis.style_vector_calculator(expanded_dlatent_tmp)[1], dim=1).numpy()
+style_min = np.min(all_style_vectors, axis=0)
+style_max = np.max(all_style_vectors, axis=0)
+
+all_style_vectors_distances = np.zeros((all_style_vectors.shape[0], all_style_vectors.shape[1], 2))
+all_style_vectors_distances[:,:, 0] = all_style_vectors - np.tile(style_min, (all_style_vectors.shape[0], 1))
+all_style_vectors_distances[:,:, 1] = np.tile(style_max, (all_style_vectors.shape[0], 1)) - all_style_vectors
+############################à
+
+#####################################
 def generate_change_image_given_dlatent(
     dlatent: np.ndarray,
     generator: networks.Generator,
@@ -107,11 +151,11 @@ def generate_change_image_given_dlatent(
   images_out = torch.maximum(torch.minimum(images_out, torch.Tensor([1])), torch.Tensor([-1]))
 
   change_image = torch.tensor(images_out.numpy())
-  result = classifier(change_image)
-  change_prob = nn.Softmax(dim=1)(result).detach().numpy()[0, class_index]
+  result = classifier(change_image.to('cuda'))
+  #change_prob = nn.Softmax(dim=1)(result).detach().numpy()[0, class_index]
   change_image = change_image.permute(0, 2, 3, 1)
 
-  return change_image, change_prob
+  return change_image#, change_prob
 #####################################
 
 #####################################
@@ -157,53 +201,9 @@ def create_latent(image):
 #####################################
 
 #####################################
-def change_image(attribute_number, lat_images):
-  #@title Load the precomputed dlatents (already concatenated to the labels)
-  latents_file = open("StylEx256/data/saved_dlantents.pkl",'rb')
-  dlatents = pickle.load(latents_file)
-  
-
-  #@title Load effect data from the tfrecord {form-width: '20%'}
-  data_path = 'StylEx256/data/examples_1.tfrecord'
-  num_classes = 2
-  print(f'Loaded dataset: {data_path}')
-  index_path = None
-  description = {"dlatent": "float", "result": "float", "base_prob": "float"}
-  dataset = TFRecordDataset(data_path, index_path, description)
-  loader = torch.utils.data.DataLoader(dataset, batch_size=1)
-  
-  style_change_effect = []
-  dlatents = []
-  base_probs = []
-  for raw_record in iter(loader):
-    dlatents.append(
-        np.array(raw_record['dlatent']))
-    seffect = np.array(
-        raw_record['result']).reshape(
-            (-1, 2, num_classes))
-    style_change_effect.append(seffect.transpose([1, 0, 2]))
-    base_probs.append(
-        np.array(raw_record['base_prob']))
-  
-  base_probs = np.array(base_probs)
-  style_change_effect = np.array(style_change_effect)
-  dlatents = torch.from_numpy(np.array(dlatents))
-  expanded_dlatent_tmp = torch.tile(dlatents, [1, num_layers, 1])
-  W_values, style_change_effect, base_probs = dlatents.squeeze(), style_change_effect.squeeze(), base_probs.squeeze()
-  
-  style_change_effect = filter_unstable_images(style_change_effect, effect_threshold=2)
-  all_style_vectors = torch.cat(generator.synthesis.style_vector_calculator(expanded_dlatent_tmp)[1], dim=1).numpy()
-  style_min = np.min(all_style_vectors, axis=0)
-  style_max = np.max(all_style_vectors, axis=0)
-  
-  all_style_vectors_distances = np.zeros((all_style_vectors.shape[0], all_style_vectors.shape[1], 2))
-  all_style_vectors_distances[:,:, 0] = all_style_vectors - np.tile(style_min, (all_style_vectors.shape[0], 1))
-  all_style_vectors_distances[:,:, 1] = np.tile(style_max, (all_style_vectors.shape[0], 1)) - all_style_vectors
-
-
-  new_images = []
-  
-  #for lat in lat_images:
+def change_image(attribute_number, lat_images):  
+  print("!!!")
+  """
   expanded_dlatent_tmp = torch.tile(lat_images.unsqueeze(1),[1, num_layers, 1]).cpu()
   svbg, _, _ = generator.synthesis.style_vector_calculator(expanded_dlatent_tmp.squeeze(0))
   result_image = np.zeros((resolution, 2 * resolution, 3), np.uint8)
@@ -211,38 +211,41 @@ def change_image(attribute_number, lat_images):
   images_out = torch.maximum(torch.minimum(images_out, torch.Tensor([1])), torch.Tensor([-1]))
   result = classifier(images_out.to('cuda'))
   base_image = images_out.permute(0, 2, 3, 1)
+  """
   
   class_index = 0
-  sindex = attribute_number
+  #sindex = attribute_number
   #sindex = 5300         #Lentiggini
-  #sindex = 3301         #Occhiali
+  sindex = 3301         #Occhiali
   #sindex = 3199          #Capelli bianchi
   #sindex = 3921
   shift_sign = "1"
   wsign_index = int(shift_sign)
   shift_size =  1
-  
-  change_image, change_prob = (
-      generate_change_image_given_dlatent(lat_images.detach().cpu(), generator, classifier,
-                                          class_index, sindex,
-                                          style_min[sindex], style_max[sindex],
-                                          wsign_index, shift_size,
-                                          label_size))
 
-  new_images.append(change_image)
+  new_images = []
 
-  """
-  fig, axes = plt.subplots(1, 2)
-  image_np = base_image[0].detach().numpy()
-  axes[0].imshow(image_np)
-  axes[0].axis('off')
-  image_np2 = change_image[0].detach().numpy()
-  axes[1].imshow(image_np2)
-  axes[1].axis('off')
-  plt.show()
-  """
+  for lat in lat_images:
+    change_image = generate_change_image_given_dlatent(lat.unsqueeze(0).detach().cpu(), generator, classifier,
+                                            class_index, sindex,
+                                            style_min[sindex], style_max[sindex],
+                                            wsign_index, shift_size,
+                                            label_size)
+
+    new_images.append(change_image)
+
+    """
+    fig, axes = plt.subplots(1, 2)
+    image_np = base_image[0].detach().numpy()
+    axes[0].imshow(image_np)
+    axes[0].axis('off')
+    image_np2 = change_image[0].detach().numpy()
+    axes[1].imshow(image_np2)
+    axes[1].axis('off')
+    plt.show()
+    """
     
-  new_images= torch.stack(new_images, dim=0)#.squeeze(1)  
+  new_images = torch.stack(new_images, dim=0).squeeze(1).permute(0, 3, 1, 2)
 
   embeddings = create_latent(new_images)
 
