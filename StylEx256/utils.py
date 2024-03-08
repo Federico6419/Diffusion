@@ -428,7 +428,7 @@ def visualize_style_by_distance_in_s(
 
 #----------------------------------------------------------------------------
 
-def load_torch_generator(pkl_file_path='./models/generator/generator_kwargs.pkl', pth_file='./models/generator/generator.pth'):
+def load_torch_generator(pkl_file_path='StylEx256/models/generator/generator_kwargs.pkl', pth_file='StylEx256/models/generator/generator.pth'):
     print('Loading generator\'s necessary kwargs...')
     with open(pkl_file_path, 'rb') as f:
         kwargs = pickle.load(f)
@@ -488,7 +488,7 @@ def create_images_from_dlatent(G,dlat_path='saved_dlantents.pkl',num_images=1, n
     
 #----------------------------------------------------------------------------
 
-def load_torch_encoder(pkl_file_path='./models/encoder/encoder_kwargs.pkl', pth_file='./models/encoder/encoder.pth'):
+def load_torch_encoder(pkl_file_path='StylEx256/models/encoder/encoder_kwargs.pkl', pth_file='StylEx256/models/encoder/encoder.pth'):
     
     print('Loading encoder\'s necessary kwargs...')
     with open(pkl_file_path, 'rb') as f:
@@ -501,7 +501,7 @@ def load_torch_encoder(pkl_file_path='./models/encoder/encoder_kwargs.pkl', pth_
     return E
 
 #----------------------------------------------------------------------------
-def load_torch_discriminator(pkl_file_path='models/discriminator/discriminator_kwargs.pkl', pth_file='models/discriminator/discriminator.pth'):
+def load_torch_discriminator(pkl_file_path='StylEx256/models/discriminator/discriminator_kwargs.pkl', pth_file='StylEx256/models/discriminator/discriminator.pth'):
     
     print('Loading discrimintor\'s necessary kwargs...')
     with open(pkl_file_path, 'rb') as f:
