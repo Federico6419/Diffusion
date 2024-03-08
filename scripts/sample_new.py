@@ -106,7 +106,7 @@ def main():
             #else:
             #    loss_text = 0
             if args.image_weight != 0:
-                loss_img = image_loss(image_features, target_img_features, args)
+                loss_img = image_loss(w_latent_batch, w_latent_batch_generated, args)
             else:
                 loss_img = 0
             total_guidance = loss_text * args.text_weight + loss_img * args.image_weight
