@@ -111,17 +111,39 @@ def generate_change_image_given_dlatent(
 #####################################
 
 #####################################
+from torch.utils.data import Dataset
+
+class CustomDataset(Dataset):
+    def __init__(self, image_list, transform=None):
+        self.image_list = image_list
+        self.transform = transform
+
+    def __len__(self):
+        return len(self.image_list)
+
+    def __getitem__(self, idx):
+        image = self.image_list[idx]
+        if self.transform:
+            image = self.transform(image)
+        return image
+#####################################
+
+#####################################
 def create_latent(image):
   dataset = CustomDataset(image)
 
   batch_size = 8
-  dataloader = DataLoader(custom_dataset, batch_size=batch_size, shuffle=False)
+  from torch.utils.data import DataLoader
+  dataloader = DataLoader(dataset, batch_size=batch_size, shuffle=False)
 
   for image in dataloader:
+    image=image.to('cuda')
     #image = plt.imread('./data/00019.jpg').transpose(2,0,1)
     #image = image.astype(np.float32) / 255.0
     
-    logits = classifier(torch.from_numpy(image).unsqueeze(0))
+    #logits = classifier(torch.from_numpy(image).unsqueeze(0))
+    #logits = classifier(image.unsqueeze(0))
+    logits = classifier(image)
     our_dlat = create_dlat_from_img_and_logits(encoder, logits, image)
 
   return our_dlat
