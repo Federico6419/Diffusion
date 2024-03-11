@@ -2,7 +2,7 @@
 Finetuning a diffusion model using StylEx counterfactual.
 """
 ################ general import ################
-import torch
+import torch as th
 import torchvision.utils as vutils
 
 ############# diffusion import #################
@@ -41,14 +41,14 @@ def main():
     
     logger.log("creating data loader...")
     original_data = load_data(
-      data_dir="../ref/counterfactual_dataset/original_images,
+      data_dir="../ref/counterfactual_dataset/original_images",
       batch_size=80,
       image_size=256,
       class_cond=False,
     )
 
     counterfactual_data = load_data(
-          data_dir="../ref/counterfactual_dataset/counterfactual_images,
+          data_dir="../ref/counterfactual_dataset/counterfactual_images",
           batch_size=80,
           image_size=256,
           class_cond=False,
@@ -81,32 +81,6 @@ def main():
 
     #################### training #########################
   
-
-
-
-
-
-def create_argparser():
-  defaults = dict(
-      data_dir="",
-      schedule_sampler="uniform",
-      lr=1e-4,
-      weight_decay=0.0,
-      lr_anneal_steps=0,
-      batch_size=1,
-      microbatch=-1,  # -1 disables microbatches
-      ema_rate="0.9999",  # comma-separated list of EMA values
-      log_interval=10,
-      save_interval=10000,
-      resume_checkpoint="",
-      use_fp16=False,
-      fp16_scale_growth=1e-3,
-  )
-  defaults.update(model_and_diffusion_defaults())
-  parser = argparse.ArgumentParser()
-  add_dict_to_argparser(parser, defaults)
-    return parser
-
 
 if __name__ == "__main__":
     main()
