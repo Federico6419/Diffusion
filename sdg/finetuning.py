@@ -8,16 +8,16 @@ import torchvision.utils as vutils
 ############# diffusion import #################
 import argparse
 
-from guided_diffusion import dist_util, logger
-from guided_diffusion.image_datasets import load_data
-from guided_diffusion.resample import create_named_schedule_sampler
-from guided_diffusion.script_util import (
+from sdg import dist_util, logger
+from sdg.image_datasets import load_data
+from sdg.resample import create_named_schedule_sampler
+from sdg.script_util import (
     model_and_diffusion_defaults,
     create_model_and_diffusion,
     args_to_dict,
     add_dict_to_argparser,
 )
-from .fp16_util import MixedPrecisionTrainer
+from sdg.fp16_util import MixedPrecisionTrainer
 
 ############## stylex counterfactual ##############
 
