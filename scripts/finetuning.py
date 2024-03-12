@@ -96,14 +96,25 @@ def main():
     
     
     ############### load checkpoint #############
-    checkpoint = "../models/ffhq_p2.pt"
+    #checkpoint = "../models/ffhq_p2.pt"
+
+    # Carica il file di checkpoint
+    checkpoint = th.load( "../models/ffhq_p2.pt", map_location='cpu')
+
+    # Visualizza le chiavi del dizionario del checkpoint
+    print("Keys in the checkpoint file:")
+    print(checkpoint.keys())
+
+    # Visualizza il contenuto del dizionario
+    #print("\nCheckpoint contents:")
+    #print(checkpoint)
     logger.log(f"loading model from checkpoint: {checkpoint}...")
     model.load_state_dict(
       dist_util.load_state_dict(
           checkpoint, map_location="cuda"
       )
     )
-    
+    logger.log(f"loading optimizer from checkpoint: {checkpoint}...")
     opt.load_state_dict(
       dist_util.load_state_dict(
           checkpoint, map_location="cuda"
