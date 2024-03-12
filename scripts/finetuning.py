@@ -4,14 +4,17 @@ Finetuning a diffusion model using StylEx counterfactual.
 ################ general import ################
 import torch as th
 import torchvision.utils as vutils
+from torch.optim import AdamW
 
 ############# diffusion import #################
 import argparse
 
 from sdg import dist_util, logger
-from sdg.image_datasets import load_data
+from sdg.image_dataset import load_data
 from sdg.resample import create_named_schedule_sampler
 from sdg.script_util import (
+    create_model,
+    create_gaussian_diffusion,
     model_and_diffusion_defaults,
     create_model_and_diffusion,
     args_to_dict,
@@ -41,19 +44,19 @@ def main():
     """
     model = create_model(
     image_size=256,
-    num_channels=256,
-    num_res_blocks=2,
+    num_channels=128,
+    num_res_blocks=1,
     channel_mult="",
-    learn_sigma=False,
+    learn_sigma=True,
     class_cond=False,
     use_checkpoint=False,
-    attention_resolutions="16,8",
+    attention_resolutions="16",
     num_heads=1,
-    num_head_channels=-1,
+    num_head_channels=64,
     num_heads_upsample=-1,
-    use_scale_shift_norm=False,
+    use_scale_shift_norm=True,
     dropout=0.0,
-    resblock_updown=False,
+    resblock_updown=True,
     use_fp16=False,
     use_new_attention_order=False,
     )
@@ -72,9 +75,9 @@ def main():
 
     model.to("cuda")
     
-    self.mp_trainer = MixedPrecisionTrainer(model=model, use_fp16=False,fp16_scale_growth=1e-3)
-    opt = AdamW(self.mp_trainer.master_params, lr=3e-4, weight_decay=0.0)
-    opt.to("cuda")
+    mp_trainer = MixedPrecisionTrainer(model=model, use_fp16=False,fp16_scale_growth=1e-3)
+    opt = AdamW(mp_trainer.master_params, lr=3e-4, weight_decay=0.0)
+    
     
     logger.log("creating data loader...")
     original_data = load_data(
