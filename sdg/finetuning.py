@@ -8,9 +8,9 @@ Finetuning a diffusion model using StylEx counterfactual.
 import argparse
 
 import dist_util, logger
-image_datasets import load_data
-resample import create_named_schedule_sampler
-script_util import (
+from image_datasets import load_data
+from resample import create_named_schedule_sampler
+from script_util import (
     model_and_diffusion_defaults,
     create_model_and_diffusion,
     args_to_dict,
