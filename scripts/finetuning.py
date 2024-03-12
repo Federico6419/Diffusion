@@ -96,30 +96,25 @@ def main():
     
     
     ############### load checkpoint #############
-    #checkpoint = "../models/ffhq_p2.pt"
+    checkpoint = "../models/ffhq_p2.pt"
 
-    # Carica il file di checkpoint
-    checkpoint = th.load( "../models/ffhq_p2.pt", map_location='cpu')
-
-    # Visualizza le chiavi del dizionario del checkpoint
-    print("Keys in the checkpoint file:")
-    print(checkpoint.keys())
-
-    # Visualizza il contenuto del dizionario
-    #print("\nCheckpoint contents:")
-    #print(checkpoint)
     logger.log(f"loading model from checkpoint: {checkpoint}...")
     model.load_state_dict(
       dist_util.load_state_dict(
           checkpoint, map_location="cuda"
       )
     )
-    logger.log(f"loading optimizer from checkpoint: {checkpoint}...")
-    opt.load_state_dict(
-      dist_util.load_state_dict(
-          checkpoint, map_location="cuda"
-      )
-    )
+    
+    opt_checkpoint = bf.join(
+            bf.dirname(checkpoint), "opt.pt"
+        )
+    if bf.exists(opt_checkpoint):
+            logger.log(f"loading optimizer state from checkpoint: {opt_checkpoint}")
+            state_dict = dist_util.load_state_dict(
+                opt_checkpoint, map_location="cuda"
+            )
+            opt.load_state_dict(state_dict)
+    
     #############################################
 
     schedule_sampler = create_named_schedule_sampler("uniform", diffusion)
