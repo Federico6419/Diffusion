@@ -39,7 +39,36 @@ def main():
     rescale_timesteps, rescale_learned_sigmas
     )
     """
-    model, diffusion = model_and_diffusion_defaults()
+    model = create_model(
+    image_size=256,
+    num_channels=256,
+    num_res_blocks=2,
+    channel_mult="",
+    learn_sigma=False,
+    class_cond=False,
+    use_checkpoint=False,
+    attention_resolutions="16,8",
+    num_heads=1,
+    num_head_channels=-1,
+    num_heads_upsample=-1,
+    use_scale_shift_norm=False,
+    dropout=0.0,
+    resblock_updown=False,
+    use_fp16=False,
+    use_new_attention_order=False,
+    )
+
+    diffusion = create_gaussian_diffusion(
+    steps=1000,
+    learn_sigma=False,
+    sigma_small=False,
+    noise_schedule="linear",
+    use_kl=False,
+    predict_xstart=False,
+    rescale_timesteps=False,
+    rescale_learned_sigmas=False,
+    timestep_respacing="",
+    )
 
     model.to("cuda")
     
