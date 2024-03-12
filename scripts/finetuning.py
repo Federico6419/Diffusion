@@ -2,7 +2,8 @@
 Finetuning a diffusion model using StylEx counterfactual.
 """
 ################ general import ################
-#import torchvision.utils as vutils
+import torch as th
+import torchvision.utils as vutils
 
 ############# diffusion import #################
 import argparse
@@ -28,10 +29,13 @@ from sdg.fp16_util import MixedPrecisionTrainer
 main code
 """
 def main():
-  
+
     model, diffusion = create_model_and_diffusion(
-      **args_to_dict(args, model_and_diffusion_defaults().keys())
-    )
+      **args_to_dict(image_size=256 ,class_cond=False, learn_sigma=True, num_channels=256, num_res_blocks=3,channel_mult="", num_heads=4,
+    num_head_channels=-1, num_heads_upsample=-1, attention_resolution="32,16,8", dropout=0.0, noise_schedule="linear",
+    use_checkpoint=False, use_scale_shift_norm=True, resblock_updown=False, use_fp16=False,
+    use_new_attention_order=False, model_and_diffusion_defaults().keys()))
+
     model.to("cuda")
     
     self.mp_trainer = MixedPrecisionTrainer(model=model, use_fp16=False,fp16_scale_growth=1e-3)
