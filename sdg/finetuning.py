@@ -7,16 +7,16 @@ Finetuning a diffusion model using StylEx counterfactual.
 ############# diffusion import #################
 import argparse
 
-from sdg import dist_util, logger
-from sdg.image_datasets import load_data
-from sdg.resample import create_named_schedule_sampler
-from sdg.script_util import (
+import dist_util, logger
+image_datasets import load_data
+resample import create_named_schedule_sampler
+script_util import (
     model_and_diffusion_defaults,
     create_model_and_diffusion,
     args_to_dict,
     add_dict_to_argparser,
 )
-from sdg.fp16_util import MixedPrecisionTrainer
+from fp16_util import MixedPrecisionTrainer
 
 ############## stylex counterfactual ##############
 
