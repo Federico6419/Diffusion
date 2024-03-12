@@ -5,6 +5,7 @@ Finetuning a diffusion model using StylEx counterfactual.
 import torch as th
 import torchvision.utils as vutils
 from torch.optim import AdamW
+import blobfile as bf
 
 ############# diffusion import #################
 import argparse
@@ -21,6 +22,7 @@ from sdg.script_util import (
     add_dict_to_argparser,
 )
 from sdg.fp16_util import MixedPrecisionTrainer
+from sdg.gaussian_diffusion import GaussianDiffusion
 
 ############## stylex counterfactual ##############
 
@@ -104,7 +106,7 @@ def main():
           checkpoint, map_location="cuda"
       )
     )
-    
+    """
     opt_checkpoint = bf.join(
             bf.dirname(checkpoint), "opt.pt"
         )
@@ -114,16 +116,17 @@ def main():
                 opt_checkpoint, map_location="cuda"
             )
             opt.load_state_dict(state_dict)
-    
+    """
     #############################################
 
     schedule_sampler = create_named_schedule_sampler("uniform", diffusion)
 
-    ################ precompute latents #####################
-    latent = q_sample(self, original_data, 1000, noise=None)
+    for b in original_data:
+      ################ precompute latents #####################
+      latent = diffusion.q_sample(b, 1000, noise=None)
 
-    # Salva il batch di immagini in un file per iterarle nel training
-    vutils.save_image(tensor_img_batch, '../latents/batch_images.png', nrow=80, normalize=True)
+      # Salva il batch di immagini in un file per iterarle nel training
+      vutils.save_image(latent, '../latents/batch_images.png', nrow=80, normalize=True)
 
     #################### training #########################
   
