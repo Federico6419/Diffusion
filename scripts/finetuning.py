@@ -98,7 +98,7 @@ def main():
     latent = q_sample(self, original_data, 1000, noise=None)
 
     # Salva il batch di immagini in un file per iterarle nel training
-    #vutils.save_image(tensor_img_batch, '../latents/batch_images.png', nrow=80, normalize=True)
+    vutils.save_image(tensor_img_batch, '../latents/batch_images.png', nrow=80, normalize=True)
 
     #################### training #########################
   
