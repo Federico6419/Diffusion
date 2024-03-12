@@ -31,33 +31,15 @@ main code
 def main():
 
     """
-    args = {
-    'image_size': 256,
-    'class_cond': False,
-    'learn_sigma': True,
-    'num_channels': 256,
-    'num_res_blocks': 3,
-    'channel_mult': "",
-    'num_heads': 4,
-    'num_head_channels': -1,
-    'num_heads_upsample': -1,
-    'attention_resolution': "32,16,8",
-    'dropout': 0.0,
-    'noise_schedule': "linear",
-    'use_checkpoint': False,
-    'use_scale_shift_norm': True,
-    'resblock_updown': False,
-    'use_fp16': False,
-    'use_new_attention_order': False
-    }
-    """
-
     model, diffusion = create_model_and_diffusion(
     #**args_to_dict(args, model_and_diffusion_defaults().keys())
     image_size=256,class_cond=False,learn_sigma=True,num_channels=256, num_res_blocks=3,channel_mult="",num_heads=4,num_head_channels=-1,
     num_heads_upsample=-1,attention_resolutions="32,16,8",dropout=0.0,noise_schedule="linear",use_checkpoint=False,use_scale_shift_norm=True,
-    resblock_updown=False,use_fp16=False,use_new_attention_order=False
+    resblock_updown=False,use_fp16=False,use_new_attention_order=False,'text_cond', diffusion_steps=4000, timestep_respacing, use_kl=False, 'predict_xstart',
+    rescale_timesteps, rescale_learned_sigmas
     )
+    """
+    model, diffusion = model_and_diffusion_defaults()
 
     model.to("cuda")
     
