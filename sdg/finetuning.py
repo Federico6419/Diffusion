@@ -2,7 +2,6 @@
 Finetuning a diffusion model using StylEx counterfactual.
 """
 ################ general import ################
-import torch as th
 import torchvision.utils as vutils
 
 ############# diffusion import #################
