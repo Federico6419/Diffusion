@@ -131,14 +131,16 @@ def main():
         ################ precompute latents #####################
         latent = diffusion.q_sample(image, th.tensor(999).to("cuda"), noise=None)
 
-        x_reversed = ddim_sample(model,latent,t=1000,clip_denoised=False,denoised_fn=None,cond_fn=None,model_kwargs=None,eta=0.0)
+        #x_reversed = diffusion.ddim_sample_loop(model,latent,shape = (80, 3, 256, 256),noise=None,device="cuda",progress=False,t=th.tensor(999),clip_denoised=False,denoised_fn=None,cond_fn=None,model_kwargs=None,eta=0.0)
         
-        img_lat_pairs.append([b[0], x_reversed.detach(), latent.detach()])
+        #img_lat_pairs.append([b[0], x_reversed.detach(), latent.detach()])
         
         # Salva il batch di immagini latenti tutte insieme in un file per vederle
         #vutils.save_image(latent, '../latents/batch_images.png', nrow=80, normalize=True)
         break
 
+
+    x_reversed = diffusion.ddim_sample_loop(model,latent,shape = (80, 3, 256, 256),noise=None,device="cuda",progress=False,t=th.tensor(999),clip_denoised=False,denoised_fn=None,cond_fn=None,model_kwargs=None,eta=0.0)
     #save latent in the right format for the traning
     
 
