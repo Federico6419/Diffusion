@@ -122,11 +122,13 @@ def main():
     schedule_sampler = create_named_schedule_sampler("uniform", diffusion)
 
     for b in original_data:
-      ################ precompute latents #####################
-      latent = diffusion.q_sample(b, 1000, noise=None)
-
-      # Salva il batch di immagini in un file per iterarle nel training
-      vutils.save_image(latent, '../latents/batch_images.png', nrow=80, normalize=True)
+        b=th.tensor(b)
+        print(b.shape)
+        ################ precompute latents #####################
+        latent = diffusion.q_sample(b, 1000, noise=None)
+        
+        # Salva il batch di immagini in un file per iterarle nel training
+        vutils.save_image(latent, '../latents/batch_images.png', nrow=80, normalize=True)
 
     #################### training #########################
   
