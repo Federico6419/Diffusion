@@ -61,8 +61,7 @@ def load_data(
         shard=MPI.COMM_WORLD.Get_rank(),
         num_shards=MPI.COMM_WORLD.Get_size(),
         random_crop=random_crop,
-        random_flip=random_flip,
-        transform=transform
+        random_flip=random_flip
     )
     if deterministic:
         loader = DataLoader(
