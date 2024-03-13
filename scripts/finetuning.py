@@ -84,6 +84,7 @@ def main():
     logger.log("creating data loader...")
     original_data = load_data(
       data_dir="../ref/counterfactual_dataset/original_images",
+      #data_dir="../ref/ref_ffhq",
       batch_size=80,
       image_size=256,
       class_cond=False,
@@ -98,7 +99,7 @@ def main():
     
     
     ############### load checkpoint #############
-    checkpoint = "../models/ffhq_p2.pt"
+    checkpoint = "../../drive/MyDrive/ffhq_p2.pt"
 
     logger.log(f"loading model from checkpoint: {checkpoint}...")
     model.load_state_dict(
@@ -121,14 +122,25 @@ def main():
 
     schedule_sampler = create_named_schedule_sampler("uniform", diffusion)
 
+    img_lat_pairs = [] # to save x_original, x_reversed, x_latent
+
     for b in original_data:
-        b=th.tensor(b)
-        print(b.shape)
+        #print(b[0].shape)
+        #print(b[1])
+        image = b[0].to("cuda")
         ################ precompute latents #####################
-        latent = diffusion.q_sample(b, 1000, noise=None)
+        latent = diffusion.q_sample(image, th.tensor(999).to("cuda"), noise=None)
+
+        x_reversed = ddim_sample(model,latent,t=1000,clip_denoised=False,denoised_fn=None,cond_fn=None,model_kwargs=None,eta=0.0)
         
-        # Salva il batch di immagini in un file per iterarle nel training
-        vutils.save_image(latent, '../latents/batch_images.png', nrow=80, normalize=True)
+        img_lat_pairs.append([b[0], x_reversed.detach(), latent.detach()])
+        
+        # Salva il batch di immagini latenti tutte insieme in un file per vederle
+        #vutils.save_image(latent, '../latents/batch_images.png', nrow=80, normalize=True)
+        break
+
+    #save latent in the right format for the traning
+    
 
     #################### training #########################
   
