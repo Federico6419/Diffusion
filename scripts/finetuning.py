@@ -85,7 +85,7 @@ def main():
     original_data = load_data(
       data_dir="../ref/counterfactual_dataset/original_images",
       #data_dir="../ref/ref_ffhq",
-      batch_size=80,
+      batch_size=8,
       image_size=256,
       class_cond=False,
     )
@@ -140,7 +140,7 @@ def main():
         break
 
     t=th.tensor(999)
-    shape = (80,3,256,256)
+    shape = (8,3,256,256)
     x_reversed = diffusion.ddim_sample_loop(model,shape=shape,noise=latent,clip_denoised=False,denoised_fn=None,cond_fn=None,model_kwargs=None,device="cuda",progress=False,eta=0.0)
     #save latent in the right format for the traning
     
