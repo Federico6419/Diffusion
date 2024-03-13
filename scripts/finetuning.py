@@ -139,8 +139,9 @@ def main():
         #vutils.save_image(latent, '../latents/batch_images.png', nrow=80, normalize=True)
         break
 
-
-    x_reversed = diffusion.ddim_sample_loop(model,latent,shape = (80, 3, 256, 256),noise=None,device="cuda",progress=False,t=th.tensor(999),clip_denoised=False,denoised_fn=None,cond_fn=None,model_kwargs=None,eta=0.0)
+    t=th.tensor(999)
+    shape = (80,3,256,256)
+    x_reversed = diffusion.ddim_sample_loop(model,shape=shape,noise=latent,clip_denoised=False,denoised_fn=None,cond_fn=None,model_kwargs=None,device="cuda",progress=False,eta=0.0)
     #save latent in the right format for the traning
     
 
