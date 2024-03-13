@@ -49,11 +49,11 @@ def load_data(
     
     ######################## aggiungiamo la transform ########################
     # Definisci le trasformazioni da applicare al dataset
-    transform = transforms.Compose([
+    """transform = transforms.Compose([
        transforms.ToTensor(),  # Converte l'immagine in un tensore
        #transforms.Normalize((0.5,), (0.5,))  # Normalizza i valori del tensore
-    ])
-    ######################################################à
+    ])"""
+    ######################################################
     dataset = ImageDataset(
         image_size,
         all_files,
