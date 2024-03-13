@@ -46,14 +46,14 @@ def load_data(
         class_names = [bf.basename(path).split("_")[0] for path in all_files]
         sorted_classes = {x: i for i, x in enumerate(sorted(set(class_names)))}
         classes = [sorted_classes[x] for x in class_names]
-
-     ######################## aggiungiamo la transform ########################
-     # Definisci le trasformazioni da applicare al dataset
-     transform = transforms.Compose([
-        transforms.ToTensor(),  # Converte l'immagine in un tensore
-        #transforms.Normalize((0.5,), (0.5,))  # Normalizza i valori del tensore
-        ])
-   ######################################################à
+    
+    ######################## aggiungiamo la transform ########################
+    # Definisci le trasformazioni da applicare al dataset
+    transform = transforms.Compose([
+       transforms.ToTensor(),  # Converte l'immagine in un tensore
+       #transforms.Normalize((0.5,), (0.5,))  # Normalizza i valori del tensore
+    ])
+    ######################################################à
     dataset = ImageDataset(
         image_size,
         all_files,
@@ -62,6 +62,7 @@ def load_data(
         num_shards=MPI.COMM_WORLD.Get_size(),
         random_crop=random_crop,
         random_flip=random_flip,
+        transform=transform
     )
     if deterministic:
         loader = DataLoader(
