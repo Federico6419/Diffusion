@@ -134,19 +134,15 @@ def main():
     
     img_lat_pairs = [] # to save x_original, x_reversed, x_latent
 
-    # Creazione del tensore
-    tensor = th.arange(1, 1001)
-
-    # Aggiunta di una dimensione per ottenere una riga
-    tensor = tensor.unsqueeze(0)
-    
-    for b in original_data:
+    with th.cuda.amp.autocast(True): 
+      for b in original_data:
         #print(b[0].shape)
         #print(b[1])
         image = b[0].to("cuda")
         vutils.save_image(image, '../latents/batch_original_images.png', nrow=80, normalize=True)
         ################ precompute latents #####################
-        latent = diffusion.ddim_reverse_sample(model, image, tensor.to("cuda"), clip_denoised=False,denoised_fn=None,model_kwargs=None)
+        t = th.tensor([0] * 8, device="cuda")
+        latent = diffusion.ddim_reverse_sample(model, image, t, clip_denoised=False,denoised_fn=None,model_kwargs=None)
         #latent = diffusion.q_sample(image, th.tensor(999).to("cuda"), noise=None)
         
         #x_reversed = diffusion.ddim_sample_loop(model,latent,shape = (80, 3, 256, 256),noise=None,device="cuda",progress=False,t=th.tensor(999),clip_denoised=False,denoised_fn=None,cond_fn=None,model_kwargs=None,eta=0.0)
@@ -156,7 +152,8 @@ def main():
         # Salva il batch di immagini latenti tutte insieme in un file per vederle
         #vutils.save_image(latent, '../latents/batch_images.png', nrow=80, normalize=True)
         break
-    
+
+
     t=th.tensor(1000)
     shape = (8,3,256,256)
     logger.log("bario")
