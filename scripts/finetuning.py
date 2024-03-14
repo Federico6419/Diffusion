@@ -62,10 +62,10 @@ def main():
     use_fp16=False,
     use_new_attention_order=False,
     )
-
+    
     diffusion = create_gaussian_diffusion(
     steps=1000,
-    learn_sigma=False,
+    learn_sigma=True,
     sigma_small=False,
     noise_schedule="linear",
     use_kl=False,
@@ -74,8 +74,9 @@ def main():
     rescale_learned_sigmas=False,
     timestep_respacing="",
     )
-
+    
     model.to("cuda")
+    model.eval()
     
     mp_trainer = MixedPrecisionTrainer(model=model, use_fp16=False,fp16_scale_growth=1e-3)
     opt = AdamW(mp_trainer.master_params, lr=3e-4, weight_decay=0.0)
@@ -83,70 +84,93 @@ def main():
     
     logger.log("creating data loader...")
     original_data = load_data(
-      data_dir="../ref/counterfactual_dataset/original_images",
-      #data_dir="../ref/ref_ffhq",
-      batch_size=8,
-      image_size=256,
-      class_cond=False,
+        data_dir="../ref/counterfactual_dataset/original_images",
+        #data_dir="../ref/ref_ffhq",
+        batch_size=8,
+        image_size=256,
+        class_cond=False,
+        deterministic = True
+        random_crop=False,
+        random_flip=False
     )
-
+    
     counterfactual_data = load_data(
-          data_dir="../ref/counterfactual_dataset/counterfactual_images",
-          batch_size=80,
-          image_size=256,
-          class_cond=False,
-        )
+        data_dir="../ref/counterfactual_dataset/counterfactual_images",
+        batch_size=80,
+        image_size=256,
+        class_cond=False,
+        deterministic = True
+        random_crop=False,
+        random_flip=False
+    )
     
     
     ############### load checkpoint #############
     checkpoint = "../../drive/MyDrive/ffhq_p2.pt"
-
+    
     logger.log(f"loading model from checkpoint: {checkpoint}...")
     model.load_state_dict(
-      dist_util.load_state_dict(
-          checkpoint, map_location="cuda"
-      )
+    th.load(checkpoint, map_location="cuda")
     )
-    """
-    opt_checkpoint = bf.join(
-            bf.dirname(checkpoint), "opt.pt"
+    """model.load_state_dict(
+        dist_util.load_state_dict(
+          checkpoint, map_location="cuda"
         )
+    )
+    
+    opt_checkpoint = bf.join(
+        bf.dirname(checkpoint), "opt.pt"
+    )
     if bf.exists(opt_checkpoint):
-            logger.log(f"loading optimizer state from checkpoint: {opt_checkpoint}")
-            state_dict = dist_util.load_state_dict(
-                opt_checkpoint, map_location="cuda"
-            )
-            opt.load_state_dict(state_dict)
+        logger.log(f"loading optimizer state from checkpoint: {opt_checkpoint}")
+        state_dict = dist_util.load_state_dict(
+            opt_checkpoint, map_location="cuda"
+        )
+        opt.load_state_dict(state_dict)
     """
     #############################################
-
+    
     schedule_sampler = create_named_schedule_sampler("uniform", diffusion)
-
+    
     img_lat_pairs = [] # to save x_original, x_reversed, x_latent
-
+    
     for b in original_data:
-        #print(b[0].shape)
-        #print(b[1])
-        image = b[0].to("cuda")
-        ################ precompute latents #####################
-        latent = diffusion.q_sample(image, th.tensor(1000).to("cuda"), noise=None)
-
-        #x_reversed = diffusion.ddim_sample_loop(model,latent,shape = (80, 3, 256, 256),noise=None,device="cuda",progress=False,t=th.tensor(999),clip_denoised=False,denoised_fn=None,cond_fn=None,model_kwargs=None,eta=0.0)
-        
-        #img_lat_pairs.append([b[0], x_reversed.detach(), latent.detach()])
-        
-        # Salva il batch di immagini latenti tutte insieme in un file per vederle
-        #vutils.save_image(latent, '../latents/batch_images.png', nrow=80, normalize=True)
-        break
-
+    #print(b[0].shape)
+    #print(b[1])
+    image = b[0].to("cuda")
+    vutils.save_image(image, '../latents/batch_original_images.png', nrow=80, normalize=True)
+    ################ precompute latents #####################
+    latent = diffusion.q_sample(image, th.tensor(999).to("cuda"), noise=None)
+    
+    #x_reversed = diffusion.ddim_sample_loop(model,latent,shape = (80, 3, 256, 256),noise=None,device="cuda",progress=False,t=th.tensor(999),clip_denoised=False,denoised_fn=None,cond_fn=None,model_kwargs=None,eta=0.0)
+    
+    #img_lat_pairs.append([b[0], x_reversed.detach(), latent.detach()])
+    
+    # Salva il batch di immagini latenti tutte insieme in un file per vederle
+    #vutils.save_image(latent, '../latents/batch_images.png', nrow=80, normalize=True)
+    break
+    
     t=th.tensor(1000)
     shape = (8,3,256,256)
-    x_reversed = diffusion.ddim_sample_loop(model,shape=shape,noise=latent,clip_denoised=False,denoised_fn=None,cond_fn=None,model_kwargs=None,device="cuda",progress=False,eta=0.0)
+    logger.log("bario")
+    with th.cuda.amp.autocast(True):
+        #x_reversed = diffusion.ddim_sample_loop(model,shape=shape,noise=latent,clip_denoised=False,denoised_fn=None,cond_fn=None,model_kwargs=None,device="cuda",progress=True,eta=0.0)
+        #logger.log("reverse done")
+        x_reversed = diffusion.p_sample_loop(
+                      model,
+                      (8, 3, 256,256),
+                      noise=latent,
+                      clip_denoised=False,
+                      model_kwargs={},
+                      cond_fn=None,
+                      device='cuda',
+                      progress = True
+                  )
     #save latent in the right format for the traning
+    vutils.save_image(x_reversed, '../latents/batch_images_reversed.png', nrow=80, normalize=True)
     
-
     #################### training #########################
-  
+
 
 if __name__ == "__main__":
     main()
