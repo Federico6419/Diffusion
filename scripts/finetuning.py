@@ -64,7 +64,7 @@ def main():
     )
     
     diffusion = create_gaussian_diffusion(
-    steps=1000,
+    steps=3000,
     learn_sigma=True,
     sigma_small=False,
     noise_schedule="linear",
@@ -143,11 +143,9 @@ def main():
         ################ precompute latents #####################
         #t = th.tensor([0] * 8, device="cuda")
 
-        t = th.tensor([0], device="cuda")
-        #latent = diffusion.ddim_reverse_sample(model, image, t, clip_denoised=False,denoised_fn=None,model_kwargs=None)
-        latent = diffusion.q_sample(image, t, noise=None)
-        
-        #x_reversed = diffusion.ddim_sample_loop(model,latent,shape = (80, 3, 256, 256),noise=None,device="cuda",progress=False,t=th.tensor(999),clip_denoised=False,denoised_fn=None,cond_fn=None,model_kwargs=None,eta=0.0)
+        t = th.tensor([2999]*1, device="cuda")
+        latent = diffusion.ddim_reverse_sample(model, image, t, clip_denoised=False,denoised_fn=None,model_kwargs=None)
+        #latent = diffusion.q_sample(image, th.tensor(999).to("cuda"), noise=None)
         
         #img_lat_pairs.append([b[0], x_reversed.detach(), latent.detach()])
         
@@ -160,7 +158,7 @@ def main():
     shape = (1,3,256,256)
     logger.log("now do the sampling:")
     with th.cuda.amp.autocast(True):
-        x_reversed = diffusion.ddim_sample_loop(model,shape=shape,noise=latent,clip_denoised=False,denoised_fn=None,cond_fn=None,model_kwargs=None,device="cuda",progress=True,eta=0.0)
+        x_reversed = diffusion.ddim_sample_loop(model,shape=shape,noise=latent["sample"],clip_denoised=False,denoised_fn=None,cond_fn=None,model_kwargs=None,device="cuda",progress=True,eta=0.0)
         logger.log("reverse done")
         """x_reversed = diffusion.p_sample_loop(
                       model,
