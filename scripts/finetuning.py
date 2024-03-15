@@ -86,7 +86,7 @@ def main():
     original_data = load_data(
         data_dir="../ref/counterfactual_dataset/original_images",
         #data_dir="../ref/ref_ffhq",
-        batch_size=8,
+        batch_size=1,
         image_size=256,
         class_cond=False,
         deterministic=True,
@@ -141,9 +141,11 @@ def main():
         image = b[0].to("cuda")
         vutils.save_image(image, '../latents/batch_original_images.png', nrow=80, normalize=True)
         ################ precompute latents #####################
-        t = th.tensor([0] * 8, device="cuda")
-        latent = diffusion.ddim_reverse_sample(model, image, t, clip_denoised=False,denoised_fn=None,model_kwargs=None)
-        #latent = diffusion.q_sample(image, th.tensor(999).to("cuda"), noise=None)
+        #t = th.tensor([0] * 8, device="cuda")
+
+        t = th.tensor([0], device="cuda")
+        #latent = diffusion.ddim_reverse_sample(model, image, t, clip_denoised=False,denoised_fn=None,model_kwargs=None)
+        latent = diffusion.q_sample(image, t, noise=None)
         
         #x_reversed = diffusion.ddim_sample_loop(model,latent,shape = (80, 3, 256, 256),noise=None,device="cuda",progress=False,t=th.tensor(999),clip_denoised=False,denoised_fn=None,cond_fn=None,model_kwargs=None,eta=0.0)
         
@@ -154,16 +156,16 @@ def main():
         break
 
 
-    t=th.tensor(1000)
-    shape = (8,3,256,256)
-    logger.log("bario")
+    #t=th.tensor(1000)
+    shape = (1,3,256,256)
+    logger.log("now do the sampling:")
     with th.cuda.amp.autocast(True):
         x_reversed = diffusion.ddim_sample_loop(model,shape=shape,noise=latent,clip_denoised=False,denoised_fn=None,cond_fn=None,model_kwargs=None,device="cuda",progress=True,eta=0.0)
-        #logger.log("reverse done")
-        """x_reversed_p = diffusion.p_sample_loop(
+        logger.log("reverse done")
+        """x_reversed = diffusion.p_sample_loop(
                       model,
-                      (8, 3, 256,256),
-                      noise=latent,
+                      (1, 3, 256,256),
+                      noise=latent["sample"],
                       clip_denoised=False,
                       model_kwargs={},
                       cond_fn=None,
