@@ -10,15 +10,15 @@ import collections
 
 from tfrecord.torch.dataset import TFRecordDataset
 
-from StylEx256.mobilenet_pytorch import MobileNetV1
-from StylEx256.stylegan2_pytorch.training import networks
+from mobilenet_pytorch import MobileNetV1
+from stylegan2_pytorch.training import networks
 
-from StylEx256.utils import *
+from utils import *
 
-CLASSIFIER_PATH = '../StylEx256/models/classifier.pth'
-DISCRIMINATOR_PATH = '../StylEx256/models/discriminator/discriminator.pth'
-ENCODER_PATH = '../StylEx256/models/encoder/encoder.pth'
-GENERATOR_PATH = '../StylEx256/models/generator/generator.pth'
+CLASSIFIER_PATH = 'models/classifier.pth'
+DISCRIMINATOR_PATH = 'models/discriminator/discriminator.pth'
+ENCODER_PATH = 'models/encoder/encoder.pth'
+GENERATOR_PATH = 'models/generator/generator.pth'
 ##################################
 
 ##################################
@@ -53,12 +53,12 @@ resolution = 256
 
 #####################################
 #@title Load the precomputed dlatents (already concatenated to the labels)
-latents_file = open("../StylEx256/data/saved_dlantents.pkl",'rb')
+latents_file = open("data/saved_dlantents.pkl",'rb')
 dlatents = pickle.load(latents_file)
 
 
 #@title Load effect data from the tfrecord {form-width: '20%'}
-data_path = '../StylEx256/data/examples_1.tfrecord'
+data_path = 'data/examples_1.tfrecord'
 num_classes = 2
 print(f'Loaded dataset: {data_path}')
 index_path = None
