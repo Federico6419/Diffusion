@@ -151,11 +151,11 @@ def generate_change_image_given_dlatent(
   images_out = torch.maximum(torch.minimum(images_out, torch.Tensor([1])), torch.Tensor([-1]))
 
   change_image = torch.tensor(images_out.numpy())
-  result = classifier(change_image.to('cuda'))
-  #change_prob = nn.Softmax(dim=1)(result).detach().numpy()[0, class_index]
+  result = classifier(change_image)
+  change_prob = nn.Softmax(dim=1)(result).detach().numpy()[0, class_index]
   change_image = change_image.permute(0, 2, 3, 1)
 
-  return change_image#, change_prob
+  return change_image, change_prob, svbg_new
 #####################################
 
 #####################################
