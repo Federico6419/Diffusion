@@ -53,7 +53,7 @@ resolution = 256
 
 #####################################
 #@title Load the precomputed dlatents (already concatenated to the labels)
-latents_file = open("StylEx256/data/saved_dlantents.pkl",'rb')
+latents_file = open("../StylEx256/data/saved_dlantents.pkl",'rb')
 dlatents = pickle.load(latents_file)
 
 
