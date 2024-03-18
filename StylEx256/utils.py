@@ -428,7 +428,7 @@ def visualize_style_by_distance_in_s(
 
 #----------------------------------------------------------------------------
 
-def load_torch_generator(pkl_file_path='StylEx256/models/generator/generator_kwargs.pkl', pth_file='StylEx256/models/generator/generator.pth'):
+def load_torch_generator(pkl_file_path='../StylEx256/models/generator/generator_kwargs.pkl', pth_file='../StylEx256/models/generator/generator.pth'):
     print('Loading generator\'s necessary kwargs...')
     with open(pkl_file_path, 'rb') as f:
         kwargs = pickle.load(f)
