@@ -12,7 +12,7 @@ import os
 import warnings
 import numpy as np
 import torch
-import stylegan2_pytorch.dnnlib as dnnlib
+import StylEx256.stylegan2_pytorch.dnnlib as dnnlib
 import traceback
 
 from .. import custom_ops
