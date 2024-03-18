@@ -20,7 +20,7 @@ import inspect
 import copy
 import uuid
 import types
-import stylegan2_pytorch.dnnlib as dnnlib
+import StylEx256.stylegan2_pytorch.dnnlib as dnnlib
 
 #----------------------------------------------------------------------------
 
