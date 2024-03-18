@@ -7,14 +7,14 @@ from PIL import ImageDraw
 from PIL import ImageFont
 from io import BytesIO
 import IPython.display
-from mobilenet_pytorch import MobileNetV1
+from StylEx256.mobilenet_pytorch import MobileNetV1
 import torch.nn as nn
 import torch
 
 import pickle
-from stylegan2_pytorch.training.torch_utils import misc
-from stylegan2_pytorch.training import networks
-import stylegan2_pytorch.dnnlib as dnnlib
+from StylEx256.stylegan2_pytorch.training.torch_utils import misc
+from StylEx256.stylegan2_pytorch.training import networks
+import StylEx256.stylegan2_pytorch.dnnlib as dnnlib
 
 def make_animation(image: np.ndarray,
                    resolution: int,
