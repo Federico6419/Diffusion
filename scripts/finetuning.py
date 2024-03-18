@@ -6,6 +6,9 @@ import torch as th
 import torchvision.utils as vutils
 from torch.optim import AdamW
 import blobfile as bf
+from torchvision.utils import save_image
+from torchvision import transforms
+from PIL import Image
 
 ############# diffusion import #################
 import argparse
@@ -23,9 +26,70 @@ from sdg.script_util import (
 )
 from sdg.fp16_util import MixedPrecisionTrainer
 from sdg.gaussian_diffusion import GaussianDiffusion
+from sdg.misc import set_random_seed
 
 ############## stylex counterfactual ##############
+from StylEx256.change_style import change_image
+from StylEx256.change_style import create_latent
 
+
+#####################
+
+def generate_counterfactual(our_dlat):
+  expanded_dlatent_tmp = torch.tile(our_dlat.unsqueeze(1),[1, num_layers, 1])
+  svbg, _, _ = generator.synthesis.style_vector_calculator(expanded_dlatent_tmp)
+  #print(len(svbg))
+  result_image = np.zeros((resolution, 2 * resolution, 3), np.uint8)
+  images_out = generator.synthesis.image_given_dlatent(expanded_dlatent_tmp, svbg)
+  images_out = torch.maximum(torch.minimum(images_out, torch.Tensor([1])), torch.Tensor([-1]))
+  result = classifier(images_out)
+  base_image = images_out.permute(0, 2, 3, 1)
+
+  #plt.imshow(base_image[0].detach().numpy())
+
+  #####
+  class_index = 0
+  #sindex = 5300         #Lentiggini
+  sindex = 3301         #Occhiali
+  #sindex = 3199          #Capelli bianchi
+  #sindex = 3921
+  shift_sign = "1"
+  wsign_index = int(shift_sign)
+  shift_size =  3
+  #####
+
+
+  change_image, change_prob, svbg_new = (
+      generate_change_image_given_dlatent(our_dlat.detach(), generator, classifier,
+                                          class_index, sindex,
+                                          style_min[sindex], style_max[sindex],
+                                          wsign_index, shift_size,
+                                          label_size))
+
+  #print(change_image.shape)
+
+  base_image = torch.from_numpy((base_image[0].numpy() * 127.5 + 127.5).astype(np.uint8)).unsqueeze(0)
+  change_image = torch.from_numpy((change_image[0].numpy() * 127.5 + 127.5).astype(np.uint8)).unsqueeze(0)
+
+  """
+  #for i in range(7):
+  #  print(svbg[i][0] - svbg_new[i][0])
+  fig, axes = plt.subplots(1, 2)
+  image_np = base_image[0].detach().numpy()
+  axes[0].imshow(image_np)
+  axes[0].axis('off')
+  image_np2 = change_image[0].detach().numpy()
+  axes[1].imshow(image_np2)
+  axes[1].axis('off')
+  plt.show()
+  """
+
+
+  base_image = base_image[0].permute(2, 0, 1).float() / 255.0
+  change_image = change_image[0].permute(2, 0, 1).float() / 255.0
+
+  save_image(base_image, f"../gdrive/MyDrive/dataset3/original/original.png")
+  save_image(change_image, f"../gdrive/MyDrive/dataset3/counterfactual/counterfactual.png")
 
 
 
@@ -35,15 +99,6 @@ main code
 """
 def main():
 
-    """
-    model, diffusion = create_model_and_diffusion(
-    #**args_to_dict(args, model_and_diffusion_defaults().keys())
-    image_size=256,class_cond=False,learn_sigma=True,num_channels=256, num_res_blocks=3,channel_mult="",num_heads=4,num_head_channels=-1,
-    num_heads_upsample=-1,attention_resolutions="32,16,8",dropout=0.0,noise_schedule="linear",use_checkpoint=False,use_scale_shift_norm=True,
-    resblock_updown=False,use_fp16=False,use_new_attention_order=False,'text_cond', diffusion_steps=4000, timestep_respacing, use_kl=False, 'predict_xstart',
-    rescale_timesteps, rescale_learned_sigmas
-    )
-    """
     model = create_model(
     image_size=256,
     num_channels=128,
@@ -134,7 +189,7 @@ def main():
     
     img_lat_pairs = [] # to save x_original, x_reversed, x_latent
 
-    with th.cuda.amp.autocast(True): 
+    """with th.cuda.amp.autocast(True): 
       for b in original_data:
         #print(b[0].shape)
         #print(b[1])
@@ -144,36 +199,40 @@ def main():
         #t = th.tensor([0] * 8, device="cuda")
 
         t = th.tensor([2999]*1, device="cuda")
-        latent = diffusion.ddim_reverse_sample(model, image, t, clip_denoised=False,denoised_fn=None,model_kwargs=None)
-        #latent = diffusion.q_sample(image, th.tensor(999).to("cuda"), noise=None)
+        #latent = diffusion.ddim_reverse_sample(model, image, t, clip_denoised=False,denoised_fn=None,model_kwargs=None)
+        latent = diffusion.q_sample(image, th.tensor(999).to("cuda"), noise=None)
         
         #img_lat_pairs.append([b[0], x_reversed.detach(), latent.detach()])
         
         # Salva il batch di immagini latenti tutte insieme in un file per vederle
         #vutils.save_image(latent, '../latents/batch_images.png', nrow=80, normalize=True)
-        break
+        break"""
+
+    set_random_seed(2, by_rank=True)
 
 
     #t=th.tensor(1000)
     shape = (1,3,256,256)
-    logger.log("now do the sampling:")
+    logger.log("start the sampling")
     with th.cuda.amp.autocast(True):
-        x_reversed = diffusion.ddim_sample_loop(model,shape=shape,noise=latent["sample"],clip_denoised=False,denoised_fn=None,cond_fn=None,model_kwargs=None,device="cuda",progress=True,eta=0.0)
-        logger.log("reverse done")
-        """x_reversed = diffusion.p_sample_loop(
+        #x_reversed = diffusion.ddim_sample_loop(model,shape=shape,noise=latent["sample"],clip_denoised=False,denoised_fn=None,cond_fn=None,model_kwargs=None,device="cuda",progress=True,eta=0.0)
+        x_reversed = diffusion.p_sample_loop(
                       model,
                       (1, 3, 256,256),
-                      noise=latent["sample"],
+                      noise=None,
                       clip_denoised=False,
                       model_kwargs={},
                       cond_fn=None,
                       device='cuda',
                       progress = True
-                  )"""
+                  )
+    logger.log("sampling done")
     #save latent in the right format for the traning
     vutils.save_image(x_reversed, '../latents/batch_images_reversed.png', nrow=80, normalize=True)
     
-    #################### training #########################
+    #################### create counterfactual #########################
+    dlatents = create_latent(x_reversed)
+    generate_counterfactual(dlatents)
 
 
 if __name__ == "__main__":
