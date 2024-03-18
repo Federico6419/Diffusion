@@ -15,10 +15,10 @@ from StylEx256.stylegan2_pytorch.training import networks
 
 from StylEx256.utils import *
 
-CLASSIFIER_PATH = 'StylEx256/models/classifier.pth'
-DISCRIMINATOR_PATH = 'StylEx256/models/discriminator/discriminator.pth'
-ENCODER_PATH = 'StylEx256/models/encoder/encoder.pth'
-GENERATOR_PATH = 'StylEx256/models/generator/generator.pth'
+CLASSIFIER_PATH = '../StylEx256/models/classifier.pth'
+DISCRIMINATOR_PATH = '../StylEx256/models/discriminator/discriminator.pth'
+ENCODER_PATH = '../StylEx256/models/encoder/encoder.pth'
+GENERATOR_PATH = '../StylEx256/models/generator/generator.pth'
 ##################################
 
 ##################################
