@@ -15,10 +15,10 @@ from stylegan2_pytorch.training import networks
 
 from utils import *
 
-CLASSIFIER_PATH = 'models/classifier.pth'
-DISCRIMINATOR_PATH = 'models/discriminator/discriminator.pth'
-ENCODER_PATH = 'models/encoder/encoder.pth'
-GENERATOR_PATH = 'models/generator/generator.pth'
+CLASSIFIER_PATH = '../../drive/MyDrive/models/classifier.pth'
+DISCRIMINATOR_PATH = '../../drive/MyDrive/models/discriminator/discriminator.pth'
+ENCODER_PATH = '../../drive/MyDrive/models/encoder/encoder.pth'
+GENERATOR_PATH = '../../drive/MyDrive/models/generator/generator.pth'
 ##################################
 
 ##################################
