@@ -8,12 +8,12 @@
 
 import numpy as np
 import torch
-from StylEx256.stylegan2_pytorch.training.torch_utils import misc
-from StylEx256.stylegan2_pytorch.training.torch_utils import persistence
-from StylEx256.stylegan2_pytorch.training.torch_utils.ops import conv2d_resample
-from StylEx256.stylegan2_pytorch.training.torch_utils.ops import upfirdn2d
-from StylEx256.stylegan2_pytorch.training.torch_utils.ops import bias_act
-from StylEx256.stylegan2_pytorch.training.torch_utils.ops import fma
+from stylegan2_pytorch.training.torch_utils import misc
+from stylegan2_pytorch.training.torch_utils import persistence
+from stylegan2_pytorch.training.torch_utils.ops import conv2d_resample
+from stylegan2_pytorch.training.torch_utils.ops import upfirdn2d
+from stylegan2_pytorch.training.torch_utils.ops import bias_act
+from stylegan2_pytorch.training.torch_utils.ops import fma
 
 #----------------------------------------------------------------------------
 
