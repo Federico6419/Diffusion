@@ -58,7 +58,7 @@ dlatents = pickle.load(latents_file)
 
 
 #@title Load effect data from the tfrecord {form-width: '20%'}
-data_path = 'StylEx256/data/examples_1.tfrecord'
+data_path = '../StylEx256/data/examples_1.tfrecord'
 num_classes = 2
 print(f'Loaded dataset: {data_path}')
 index_path = None
