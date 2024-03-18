@@ -10,10 +10,10 @@ import collections
 
 from tfrecord.torch.dataset import TFRecordDataset
 
-from mobilenet_pytorch import MobileNetV1
-from stylegan2_pytorch.training import networks
+from StylEx256.mobilenet_pytorch import MobileNetV1
+from StylEx256.stylegan2_pytorch.training import networks
 
-from utils import *
+from StylEx256.utils import *
 
 CLASSIFIER_PATH = 'StylEx256/models/classifier.pth'
 DISCRIMINATOR_PATH = 'StylEx256/models/discriminator/discriminator.pth'
