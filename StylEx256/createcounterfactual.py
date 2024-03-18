@@ -209,7 +209,8 @@ def main():
     
     #################### create counterfactual #########################
     dlatents = create_latent(x_reversed)
-    generate_counterfactual(dlatents)
+    c = generate_counterfactual(dlatents)
+    vutils.save_image(c, '../latents/counterfactual.png', nrow=80, normalize=True)
 
 
 if __name__ == "__main__":
