@@ -84,7 +84,7 @@ def main():
     original_data = load_data(
         data_dir="../ref/counterfactual_dataset/original_images",
         #data_dir="../ref/ref_ffhq",
-        batch_size=3,
+        batch_size=1,
         image_size=256,
         class_cond=False,
         deterministic=False,
@@ -94,7 +94,7 @@ def main():
     
     counterfactual_data = load_data(
         data_dir="../ref/counterfactual_dataset/counterfactual_images",
-        batch_size=80,
+        batch_size=1,
         image_size=256,
         class_cond=False,
         deterministic=True,
@@ -133,10 +133,10 @@ def main():
     img_lat_pairs = [] # to save x_original, x_reversed, x_latent
     counterfactual_array = []
 
-    shape = (3,3,256,256)
+    shape = (1,3,256,256)
 
     logger.log("precomputing the latents")
-    with th.cuda.amp.autocast(True): 
+    """with th.cuda.amp.autocast(True): 
       for b in original_data:
         #print(b[0].shape)
         #print(b[1])
@@ -147,27 +147,29 @@ def main():
 
         latent = diffusion.ddim_reverse_sample_loop(model,shape=shape,noise=image, clip_denoised=False,denoised_fn=None,model_kwargs=None,device="cuda",progress=True,eta=0.0)
         #latent = diffusion.q_sample(image, th.tensor(999).to("cuda"), noise=None)
+
+        x_reversed = diffusion.ddim_sample_loop(model,shape=shape,noise=latent,clip_denoised=False,denoised_fn=None,cond_fn=None,model_kwargs=None,device="cuda",progress=True,eta=0.0)
         
         img_lat_pairs.append([b[0], x_reversed.detach(), latent.detach()])
         
         # Salva il batch di immagini latenti tutte insieme in un file per vederle
         vutils.save_image(latent, '../latents/batch_noise.png', nrow=80, normalize=True)
-        break
+        break"""
 
 
     logger.log("saving counterfactuals")
     #save counterfactual images in array of tensor
     with th.cuda.amp.autocast(True): 
-      for b in counterfactual_data:
-        image = b[0].to("cuda")
-        counterfactual_array.append(b[0])
+      for a in counterfactual_data:
+        image = a[0].to("cuda")
+        counterfactual_array.append(a[0])
         
 
     
-    logger.log("start the sampling")
+    """logger.log("start the sampling")
     with th.cuda.amp.autocast(True):
         x_reversed = diffusion.ddim_sample_loop(model,shape=shape,noise=latent,clip_denoised=False,denoised_fn=None,cond_fn=None,model_kwargs=None,device="cuda",progress=True,eta=0.0)
-        """x_reversed = diffusion.p_sample_loop(
+        x_reversed = diffusion.p_sample_loop(
                       model,
                       (3, 3, 256,256),
                       noise=latent,
@@ -178,7 +180,7 @@ def main():
                       progress = True
                   )"""
     #save latent in the right format for the traning
-    vutils.save_image(x_reversed, '../latents/batch_images_reversed.png', nrow=80, normalize=True)
+    #vutils.save_image(x_reversed, '../latents/batch_images_reversed.png', nrow=80, normalize=True)
     
     #################### finetuning #########################
     logger.log("start finetuning")
@@ -210,6 +212,8 @@ def main():
         
     #th.save(model.state_dict(), save_name)
     #logger.log(f'Model {save_name} is saved.')
+
+
 
 
 
