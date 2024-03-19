@@ -131,6 +131,8 @@ def main():
     
     img_lat_pairs = [] # to save x_original, x_reversed, x_latent
 
+    shape = (1,3,256,256)
+
     with th.cuda.amp.autocast(True): 
       for b in original_data:
         #print(b[0].shape)
@@ -141,7 +143,7 @@ def main():
         #t = th.tensor([0] * 8, device="cuda")
 
         t = th.tensor([999]*1, device="cuda")
-        latent = diffusion.ddim_reverse_sample(model, image, t, clip_denoised=False,denoised_fn=None,model_kwargs=None)
+        latent = diffusion.ddim_reverse_sample_loop(model,shape=shape,noise=image, t, clip_denoised=False,denoised_fn=None,model_kwargs=None,device="cuda",progress=True,eta=0.0)
         #latent = diffusion.q_sample(image, th.tensor(999).to("cuda"), noise=None)
         
         #img_lat_pairs.append([b[0], x_reversed.detach(), latent.detach()])
@@ -152,7 +154,6 @@ def main():
 
 
     #t=th.tensor(1000)
-    shape = (1,3,256,256)
     logger.log("start the sampling")
     with th.cuda.amp.autocast(True):
         x_reversed = diffusion.ddim_sample_loop(model,shape=shape,noise=latent["sample"],clip_denoised=False,denoised_fn=None,cond_fn=None,model_kwargs=None,device="cuda",progress=True,eta=0.0)
