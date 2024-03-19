@@ -741,7 +741,7 @@ class GaussianDiffusion:
         Same usage as p_sample_loop().
         """
         final = None
-        for sample in self.ddim_sample_loop_progressive(
+        for sample in self.ddim_reverse_sample_loop_progressive(
             model,
             shape,
             noise=noise,
