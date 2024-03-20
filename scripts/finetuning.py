@@ -38,7 +38,7 @@ from sdg.clip_guidance import CLIP_gd
 
 ##################### CLIP parameters ############
 clip_path = "../../drive/MyDrive/clip_ffhq.pt"
-args = {'image_size':256}
+args = argparse.Namespace(image_size=256, finetune_clip_layer='all')
 clip_ft = CLIP_gd(args)
 clip_ft.load_state_dict(th.load(clip_path, map_location='cpu'))
 clip_ft.eval()
@@ -57,11 +57,11 @@ def compute_loss(x_reversed, x_counterfactual):
   with th.enable_grad():
     #embedding image reversed
     x_reversed = x_reversed.detach().requires_grad_(True)
-    embedding_reversed = clip_ft.encode_image_list(x_reversed, 1000)
+    embedding_reversed = clip_ft.encode_image_list(x_reversed, th.tensor(1))
 
     #embedding counterfactual
     x_counterfatcual = x_reversed.detach().requires_grad_(True)
-    embedding_counterfactual = clip_ft.encode_image_list(x_reversed, 1000)
+    embedding_counterfactual = clip_ft.encode_image_list(x_reversed, th.tensor(1))
 
     cos_similarity = cos_distance(embedding_reversed, embedding_counterfactual)
 
