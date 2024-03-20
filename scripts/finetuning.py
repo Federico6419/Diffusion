@@ -50,22 +50,24 @@ def cos_distance(embedding_reversed, embedding_counterfactual):
   source = embedding_reversed / embedding_reversed.norm(dim=-1, keepdim=True)
   target = (embedding_counterfactual /  embedding_counterfactual.norm(dim=-1, keepdim=True))
   loss = (source * target).sum(1)
-  return loss
+  return loss.half()
 
 #compute the image loss between countefactual and reversed using cos distance
 def compute_loss(x_reversed, x_counterfactual):
   with th.enable_grad():
-    #embedding image reversed
-    x_reversed = x_reversed.detach().requires_grad_(True)
-    embedding_reversed = clip_ft.encode_image_list(x_reversed, th.tensor(1))
+    with th.cuda.amp.autocast(True): 
+      #embedding image reversed
+      x_reversed = x_reversed.detach().requires_grad_(True).half() 
+      embedding_reversed = clip_ft.encode_image_list(x_reversed, th.tensor([1000]).half().to("cuda"))
 
-    #embedding counterfactual
-    x_counterfatcual = x_reversed.detach().requires_grad_(True)
-    embedding_counterfactual = clip_ft.encode_image_list(x_reversed, th.tensor(1))
+      #embedding counterfactual
+      x_counterfatcual = x_reversed.detach().requires_grad_(True).half() 
+      embedding_counterfactual = clip_ft.encode_image_list(x_counterfactual,th.tensor([1000]).half().to("cuda"))
 
-    cos_similarity = cos_distance(embedding_reversed, embedding_counterfactual)
+      cos_similarity = cos_distance(embedding_reversed, embedding_counterfactual)
 
-    return th.autograd.grad(cos_similarity, x_reversed)[0]
+      return th.autograd.grad(cos_similarity, x_reversed)[0]
+      #return cos_similarity
 
 
 """
@@ -226,14 +228,14 @@ def main():
     #################### finetuning #########################
     logger.log("start finetuning")
     n_iter = 10
-    with th.cuda.amp.autocast(True):
-      for epoch in range(n_iter):#epoch
-        for step in range(len(img_lat_pairs)):
-          print(step)
-          model.train()
-          opt.zero_grad()
-          with tqdm(total=50, desc=f"step iteration") as progress_bar:
-            for iteration in range(50):
+    for epoch in range(n_iter):#epoch
+      for step in range(len(img_lat_pairs)):
+        print(step)
+        model.train()
+        opt.zero_grad()
+        with tqdm(total=50, desc=f"step iteration") as progress_bar:
+          for iteration in range(50):
+            with th.cuda.amp.autocast(True):
 
               x_reversed = diffusion.ddim_sample_loop(model,shape=shape,noise=img_lat_pairs[step][2].to("cuda"),clip_denoised=False,denoised_fn=None,cond_fn=None,model_kwargs=None,device="cuda",progress=False,eta=0.0)
 
