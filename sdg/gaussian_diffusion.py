@@ -723,7 +723,7 @@ class GaussianDiffusion:
                 yield out
                 img = out["sample"]
 
-     def ddim_reverse_sample_loop(
+    def ddim_reverse_sample_loop(
         self,
         model,
         shape,
