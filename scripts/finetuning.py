@@ -46,10 +46,10 @@ clip_ft = clip_ft.cuda()
 ###############################################
 
 #compute cos distance
-def cos_distance(embedding_reversed, embedding_counterfactual):
-  source = embedding_reversed / embedding_reversed.norm(dim=-1, keepdim=True)
-  target = (embedding_counterfactual /  embedding_counterfactual.norm(dim=-1, keepdim=True))
-  loss = (source * target).sum(1)
+def cos_distance(source, target):
+  source[-1] = source[-1] / source[-1].norm(dim=-1, keepdim=True)
+  target[-1] = target[-1] / target[-1].norm(dim=-1, keepdim=True)
+  loss = (source[-1] * target[-1]).sum(1)
   return loss.half()
 
 #compute the image loss between countefactual and reversed using cos distance
@@ -61,13 +61,13 @@ def compute_loss(x_reversed, x_counterfactual):
       embedding_reversed = clip_ft.encode_image_list(x_reversed, th.tensor([1000]).half().to("cuda"))
 
       #embedding counterfactual
-      x_counterfatcual = x_reversed.detach().requires_grad_(True).half() 
-      embedding_counterfactual = clip_ft.encode_image_list(x_counterfactual,th.tensor([1000]).half().to("cuda"))
+      x_counterfactual = x_counterfactual.detach().requires_grad_(True).half()
+      embedding_counterfactual = clip_ft.encode_image_list(x_counterfactual.to("cuda"), th.tensor([1000]).half().to("cuda"))
 
       cos_similarity = cos_distance(embedding_reversed, embedding_counterfactual)
 
-      return th.autograd.grad(cos_similarity, x_reversed)[0]
-      #return cos_similarity
+      #return th.autograd.grad(cos_similarity, x_reversed)[0]
+      return cos_similarity
 
 
 """
@@ -117,17 +117,17 @@ def main():
     original_data = load_data(
         data_dir="../ref/counterfactual_dataset/original_images",
         #data_dir="../ref/ref_ffhq",
-        batch_size=1,
+        batch_size=8,
         image_size=256,
         class_cond=False,
-        deterministic=False,
+        deterministic=True,
         random_crop=False,
         random_flip=False
     )
     
     counterfactual_data = load_data(
         data_dir="../ref/counterfactual_dataset/counterfactual_images",
-        batch_size=1,
+        batch_size=8,
         image_size=256,
         class_cond=False,
         deterministic=True,
@@ -166,7 +166,7 @@ def main():
     img_lat_pairs = [] # to save x_original, x_reversed, x_latent
     counterfactual_array = []
 
-    shape = (1,3,256,256)
+    shape = (8,3,256,256)
 
     file_path = '../latents/precomputed_latents'
 
@@ -193,7 +193,6 @@ def main():
             
             # Salva il batch di immagini latenti tutte insieme in un file per vederle
             vutils.save_image(latent, '../latents/batch_noise.png', nrow=80, normalize=True)
-            break
     
           # Salva il tensore nel file
           th.save( img_lat_pairs, file_path)
@@ -204,9 +203,7 @@ def main():
     with th.cuda.amp.autocast(True): 
       for a in counterfactual_data:
         image = a[0].to("cuda")
-        counterfactual_array.append(a[0])
-        break
-        
+        counterfactual_array.append(a[0])        
 
     
     """logger.log("start the sampling")
@@ -233,29 +230,27 @@ def main():
         print(step)
         model.train()
         opt.zero_grad()
-        with tqdm(total=50, desc=f"step iteration") as progress_bar:
-          for iteration in range(50):
-            with th.cuda.amp.autocast(True):
+        with tqdm(total=80, desc=f"step iteration") as progress_bar:
+          with th.cuda.amp.autocast(True):
 
-              x_reversed = diffusion.ddim_sample_loop(model,shape=shape,noise=img_lat_pairs[step][2].to("cuda"),clip_denoised=False,denoised_fn=None,cond_fn=None,model_kwargs=None,device="cuda",progress=False,eta=0.0)
+            x_reversed = diffusion.ddim_sample_loop(model,shape=shape,noise=img_lat_pairs[step][2].to("cuda"),clip_denoised=False,denoised_fn=None,cond_fn=None,model_kwargs=None,device="cuda",progress=False,eta=0.0)
 
-              progress_bar.update(1)
-              x_reversed = x_reversed.detach()
+            progress_bar.update(1)
+            x_reversed = x_reversed.detach()
 
-              #save image
-              vutils.save_image(x_reversed,'../latents/batch_images_reversed.png', nrow=80, normalize=True)
+            #save image
+            vutils.save_image(x_reversed,'../latents/batch_images_reversed.png', nrow=80, normalize=True)
 
-              #compute cos distance
-              loss = compute_loss(x_reversed, counterfactual_array[step])
+            #compute cos distance
+            loss = compute_loss(x_reversed, counterfactual_array[step]).requires_grad_(True)
 
-              loss.backward()
+            loss.backward()
 
-              opt.step()
+            opt.step()
         
-    #th.save(model.state_dict(), save_name)
-    #logger.log(f'Model {save_name} is saved.')
-
-
+    save_name = "../latents/nuovi.pt"
+    th.save(model.state_dict(), save_name)
+    logger.log(f'Model {save_name} is saved.')
 
 
 
