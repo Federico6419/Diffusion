@@ -236,17 +236,21 @@ def main():
           with th.cuda.amp.autocast(True): 
             x_reversed = diffusion.ddim_sample_loop(model,shape=shape,noise=img_lat_pairs[step][2].half().to("cuda"),clip_denoised=False,denoised_fn=None,cond_fn=None,model_kwargs=None,device="cuda",progress=False,eta=0.0) 
             x_reversed = x_reversed.requires_grad_(True) 
+            #t = th.tensor([100] * shape[0], device="cuda")
+            #model_output = model(img_lat_pairs[step][2].half().to("cuda"), t, {})
+            
             counterfactual_array[step] = counterfactual_array[step].requires_grad_(True) 
             progress_bar.update(1) 
  
             #save image 
-            vutils.save_image(x_reversed,'../latents/batch_images_reversed.png', nrow=80, normalize=True) 
+            #vutils.save_image(x_reversed,'../latents/batch_images_reversed.png', nrow=80, normalize=True) 
  
             #compute cos distance 
             loss = compute_loss(x_reversed, counterfactual_array[step]) 
             print(loss) 
+            #loss= model_output.mean()
  
-            loss.backward() 
+            loss.backward(retain_graph=True) 
  
             opt.step() 
 
@@ -255,7 +259,7 @@ def main():
                 if param.grad is not None: 
                     print(f'Parameter {name}: Gradients exist') 
                 else: 
-                    print(f'Parameter {name}: No gradients') 
+                    print(f'Parameter {name}: No gradients')
  
             """
             print(x_reversed.requires_grad) 
