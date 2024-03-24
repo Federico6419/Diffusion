@@ -250,7 +250,7 @@ def main():
             print(loss) 
             #loss= model_output.mean()
  
-            loss.backward(retain_graph=True) 
+            loss.backward() 
  
             opt.step() 
 
