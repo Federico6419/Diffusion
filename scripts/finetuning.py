@@ -28,7 +28,7 @@ from sdg.script_util import (
 ) 
 from sdg.fp16_util import MixedPrecisionTrainer 
 from sdg.gaussian_diffusion import GaussianDiffusion 
-from sdg.misc import set_random_seed 
+from sdg.misc import requires_grad, set_random_seed 
 from sdg.clip_guidance import CLIP_gd 
  
 ############## stylex counterfactual ############## 
@@ -237,34 +237,39 @@ def main():
             # Creazione di una matrice con 1000 righe e una colonna
             shapes = (1000, 1)
             t = th.arange(1, 1001, device="cuda").reshape(shapes)
-            image = img_lat_pairs[step][2].half().to("cuda").requires_grad_(True) 
+            im = img_lat_pairs[step][2].half().to("cuda")
+            #image = im.requires_grad_(True)
+            image = im.clone()
             # Abilita il rilevamento delle anomalie
             th.autograd.set_detect_anomaly(True)
             for i in range(500): 
               opt.zero_grad() 
               #t = th.tensor([100] * shape[0], device="cuda")
+              print("EGREGIO " + str(image.shape))
               if i==0:
-                x_reversed = diffusion.ddim_sample(model,x=image,t=t[i],clip_denoised=False,denoised_fn=None,cond_fn=None,model_kwargs=None,eta=0.0) 
+                x = diffusion.ddim_sample(model,x=image,t=t[i],clip_denoised=False,denoised_fn=None,cond_fn=None,model_kwargs=None,eta=0.0) 
               else:
                 print("aooooooooooooooooooooooo")
-                x_reversed = diffusion.ddim_sample(model,x=x_reversed.clone(),t=t[i],clip_denoised=False,denoised_fn=None,cond_fn=None,model_kwargs=None,eta=0.0) 
+                #img = x_reversed.requires_grad_(True).to("cuda")
+                x = diffusion.ddim_sample(model,x=image,t=t[i],clip_denoised=False,denoised_fn=None,cond_fn=None,model_kwargs=None,eta=0.0) 
               #x_reversed = diffusion.ddim_sample_loop(model,shape=shape,noise=img_lat_pairs[step][2].half().to("cuda"),clip_denoised=False,denoised_fn=None,cond_fn=None,model_kwargs=None,device="cuda",progress=False,eta=0.0) 
               #x_reversed = x_reversed.requires_grad_(True) 
-              x_reversed = x_reversed["sample"]
-              x_reversed = x_reversed.requires_grad_(True) 
+              y = x["sample"]
+              #x_reversed = x_reversed
               #t = th.tensor([100] * shape[0], device="cuda")
               #model_output = model(img_lat_pairs[step][2].half().to("cuda"), t, {})
 
               #model_output, model_var_values = th.split(model_output, 3, dim=1)
               #print(model_output.shape)
-
             
-              counterfactual_array[step] = counterfactual_array[step].requires_grad_(True) 
+              #counterfactual_array[step] = counterfactual_array[step]
+              #count = counterfactual_array[step].requires_grad_(True) 
               progress_bar.update(1) 
   
               #save image 
               #vutils.save_image(x_reversed,'../latents/batch_images_reversed.png', nrow=80, normalize=True) 
               
+              """
               loss = x_reversed.mean()
               grads = th.autograd.grad(loss, model.parameters(), retain_graph=True,allow_unused=True)
               opt.zero_grad()
@@ -272,14 +277,19 @@ def main():
                   param.grad = grad
               opt.step()
               """
+
               #compute cos distance 
               #loss = compute_loss(x_reversed, counterfactual_array[step]) 
               #print(loss) 
-              loss= x_reversed.mean()
+              loss= y.mean()
   
-              loss.backward(retain_graph=True) 
+              loss.backward() 
+
+              print("MATTO")
   
-              opt.step()"""
+              opt.step()
+
+              image = y.detach().clone()
 
             # Verify gradients 
             for name, param in model.named_parameters(): 
