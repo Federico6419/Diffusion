@@ -234,25 +234,52 @@ def main():
         opt.zero_grad() 
         with tqdm(total=1, desc=f"step iteration") as progress_bar: 
           with th.cuda.amp.autocast(True): 
-            x_reversed = diffusion.ddim_sample_loop(model,shape=shape,noise=img_lat_pairs[step][2].half().to("cuda"),clip_denoised=False,denoised_fn=None,cond_fn=None,model_kwargs=None,device="cuda",progress=False,eta=0.0) 
-            x_reversed = x_reversed.requires_grad_(True) 
-            #t = th.tensor([100] * shape[0], device="cuda")
-            #model_output = model(img_lat_pairs[step][2].half().to("cuda"), t, {})
+            # Creazione di una matrice con 1000 righe e una colonna
+            shapes = (1000, 1)
+            t = th.arange(1, 1001, device="cuda").reshape(shapes)
+            image = img_lat_pairs[step][2].half().to("cuda").requires_grad_(True) 
+            # Abilita il rilevamento delle anomalie
+            th.autograd.set_detect_anomaly(True)
+            for i in range(500): 
+              opt.zero_grad() 
+              #t = th.tensor([100] * shape[0], device="cuda")
+              if i==0:
+                x_reversed = diffusion.ddim_sample(model,x=image,t=t[i],clip_denoised=False,denoised_fn=None,cond_fn=None,model_kwargs=None,eta=0.0) 
+              else:
+                print("aooooooooooooooooooooooo")
+                x_reversed = diffusion.ddim_sample(model,x=x_reversed.clone(),t=t[i],clip_denoised=False,denoised_fn=None,cond_fn=None,model_kwargs=None,eta=0.0) 
+              #x_reversed = diffusion.ddim_sample_loop(model,shape=shape,noise=img_lat_pairs[step][2].half().to("cuda"),clip_denoised=False,denoised_fn=None,cond_fn=None,model_kwargs=None,device="cuda",progress=False,eta=0.0) 
+              #x_reversed = x_reversed.requires_grad_(True) 
+              x_reversed = x_reversed["sample"]
+              x_reversed = x_reversed.requires_grad_(True) 
+              #t = th.tensor([100] * shape[0], device="cuda")
+              #model_output = model(img_lat_pairs[step][2].half().to("cuda"), t, {})
+
+              #model_output, model_var_values = th.split(model_output, 3, dim=1)
+              #print(model_output.shape)
+
             
-            counterfactual_array[step] = counterfactual_array[step].requires_grad_(True) 
-            progress_bar.update(1) 
- 
-            #save image 
-            #vutils.save_image(x_reversed,'../latents/batch_images_reversed.png', nrow=80, normalize=True) 
- 
-            #compute cos distance 
-            loss = compute_loss(x_reversed, counterfactual_array[step]) 
-            print(loss) 
-            #loss= model_output.mean()
- 
-            loss.backward() 
- 
-            opt.step() 
+              counterfactual_array[step] = counterfactual_array[step].requires_grad_(True) 
+              progress_bar.update(1) 
+  
+              #save image 
+              #vutils.save_image(x_reversed,'../latents/batch_images_reversed.png', nrow=80, normalize=True) 
+              
+              loss = x_reversed.mean()
+              grads = th.autograd.grad(loss, model.parameters(), retain_graph=True,allow_unused=True)
+              opt.zero_grad()
+              for param, grad in zip(model.parameters(), grads):
+                  param.grad = grad
+              opt.step()
+              """
+              #compute cos distance 
+              #loss = compute_loss(x_reversed, counterfactual_array[step]) 
+              #print(loss) 
+              loss= x_reversed.mean()
+  
+              loss.backward(retain_graph=True) 
+  
+              opt.step()"""
 
             # Verify gradients 
             for name, param in model.named_parameters(): 
