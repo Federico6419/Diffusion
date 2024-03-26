@@ -53,16 +53,16 @@ def cos_distance(source, target):
   return loss 
  
 #compute the image loss between countefactual and reversed using cos distance 
-def compute_loss(x_reversed, x_counterfactual): 
+def compute_loss(x_reversed, x_counterfactual, t): 
   with th.enable_grad(): 
     with th.cuda.amp.autocast(True):  
       #embedding image reversed 
       x_reversed = x_reversed.half()  
-      embedding_reversed = clip_ft.encode_image_list(x_reversed, th.tensor([1000]).half().to("cuda")) 
+      embedding_reversed = clip_ft.encode_image_list(x_reversed, t) 
  
       #embedding counterfactual 
       x_counterfactual = x_counterfactual.half() 
-      embedding_counterfactual = clip_ft.encode_image_list(x_counterfactual.to("cuda"), th.tensor([1000]).half().to("cuda")) 
+      embedding_counterfactual = clip_ft.encode_image_list(x_counterfactual.to("cuda"), t) 
  
       cos_similarity = cos_distance(embedding_reversed, embedding_counterfactual) 
  
@@ -243,11 +243,10 @@ def main():
             image = im.clone()
             # Abilita il rilevamento delle anomalie
             th.autograd.set_detect_anomaly(True)
-            for i in indices:
-              with th.no_grad():               
+            for i in indices:           
                 t = th.tensor([i] * 1, device='cuda')
                 print("EZIO "+str(t))
-                opt.zero_grad() 
+                #opt.zero_grad() 
                 #t = th.tensor([100] * shape[0], device="cuda")
                 x = diffusion.ddim_sample(model,x=image,t=t,clip_denoised=False,denoised_fn=None,cond_fn=None,model_kwargs=None,eta=0.0) 
 
@@ -278,22 +277,22 @@ def main():
                 """
 
                 #compute cos distance 
-                #loss = compute_loss(y, counterfactual_array[step]) 
+                loss = compute_loss(y, counterfactual_array[step], t) 
                 #print(loss) 
                 #loss= y.mean()
 
-                #loss.backward() 
+                loss.backward() 
 
                 print("MATTO")
-                #print(loss)
+                print(loss)
 
-                #opt.step()
+                opt.step()
 
-                #for p in model.parameters():
-                #    p.grad = None
+                for p in model.parameters():
+                    p.grad = None
 
-                #image = y.detach().clone()
-                image = y
+                image = y.detach().clone()
+                #image = y
 
             """
             # Verify gradients 
