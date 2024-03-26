@@ -279,7 +279,7 @@ def main():
               """
 
               #compute cos distance 
-              loss = compute_loss(x_reversed, counterfactual_array[step]) 
+              loss = compute_loss(y, counterfactual_array[step]) 
               #print(loss) 
               #loss= y.mean()
   
@@ -289,6 +289,9 @@ def main():
               print(loss)
   
               opt.step()
+
+              for p in model.parameters():
+                  p.grad = None
 
               image = y.detach().clone()
 
