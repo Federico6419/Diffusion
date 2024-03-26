@@ -11,6 +11,7 @@ from torchvision import transforms
 from PIL import Image 
 from tqdm.auto import tqdm 
 import os 
+from torch import nn
  
 ############# diffusion import ################# 
 import argparse 
@@ -53,7 +54,7 @@ def cos_distance(source, target):
   return loss 
  
 #compute the image loss between countefactual and reversed using cos distance 
-def compute_loss(x_reversed, x_counterfactual, t): 
+def direction_loss(x_reversed, x_counterfactual, t): 
   with th.enable_grad(): 
     with th.cuda.amp.autocast(True):  
       #embedding image reversed 
@@ -68,6 +69,40 @@ def compute_loss(x_reversed, x_counterfactual, t):
  
       #return th.autograd.grad(cos_similarity, x_reversed)[0] 
       return cos_similarity 
+
+"""
+class IDLoss(nn.Module):
+    def __init__(self, use_mobile_id=False):
+        super(IDLoss, self).__init__()
+        print('Loading ResNet ArcFace')
+        self.facenet = Backbone(input_size=112, num_layers=50, drop_ratio=0.6, mode='ir_se')
+        self.facenet.load_state_dict(torch.load(MODEL_PATHS['ir_se50']))
+
+        self.face_pool = torch.nn.AdaptiveAvgPool2d((112, 112))
+        self.facenet.eval()
+
+    def extract_feats(self, x):
+        x = x[:, :, 35:223, 32:220]  # Crop interesting region
+        x = self.face_pool(x)
+        x_feats = self.facenet(x)
+        return x_feats
+
+    def forward(self, x, x_hat):
+        n_samples = x.shape[0]
+        x_feats = self.extract_feats(x)
+        x_feats = x_feats.detach()
+
+        x_hat_feats = self.extract_feats(x_hat)
+        losses = []
+        for i in range(n_samples):
+            loss_sample = 1 - x_hat_feats[i].dot(x_feats[i])
+            losses.append(loss_sample.unsqueeze(0))
+
+        losses = torch.cat(losses, dim=0)
+        return losses
+"""
+
+
  
  
 """ 
@@ -260,7 +295,7 @@ def main():
                 #model_output, model_var_values = th.split(model_output, 3, dim=1)
                 #print(model_output.shape)
               
-                counterfactual_array[step] = counterfactual_array[step]
+                counterfactual_array[step] = counterfactual_array[step].to('cuda')
                 #count = counterfactual_array[step].requires_grad_(True) 
                 progress_bar.update(1) 
         
@@ -277,9 +312,11 @@ def main():
                 """
 
                 #compute cos distance 
-                loss = compute_loss(y, counterfactual_array[step], t) 
-                #print(loss) 
-                #loss= y.mean()
+                #loss = direction_loss(y, counterfactual_array[step], t)
+                loss_clip = -th.log((2 - direction_loss(y, counterfactual_array[step], t)) / 2)
+                loss_l1 = nn.L1Loss()(y, counterfactual_array[step])
+                #loss_id = th.mean(id_loss(y, counterfactual_array[step]))
+                loss = 3 * loss_clip + 1 * loss_l1# + self.args.id_loss_w * loss_id
 
                 loss.backward() 
 
@@ -304,9 +341,9 @@ def main():
             """
 
          
-    save_name = "../latents/nuovi.pt" 
-    th.save(model.state_dict(), save_name) 
-    logger.log(f'Model {save_name} is saved.') 
+      save_name = "../latents/nuovi.pt" 
+      th.save(model.state_dict(), save_name) 
+      logger.log(f'Model {save_name} is saved.') 
  
  
  
