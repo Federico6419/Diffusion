@@ -242,7 +242,7 @@ def main():
             image = im.clone()
             # Abilita il rilevamento delle anomalie
             th.autograd.set_detect_anomaly(True)
-            for i in range(500): 
+            for i in range(1000): 
               opt.zero_grad() 
               #t = th.tensor([100] * shape[0], device="cuda")
               print("EGREGIO " + str(image.shape))
@@ -262,12 +262,12 @@ def main():
               #model_output, model_var_values = th.split(model_output, 3, dim=1)
               #print(model_output.shape)
             
-              #counterfactual_array[step] = counterfactual_array[step]
+              counterfactual_array[step] = counterfactual_array[step]
               #count = counterfactual_array[step].requires_grad_(True) 
               progress_bar.update(1) 
   
               #save image 
-              #vutils.save_image(x_reversed,'../latents/batch_images_reversed.png', nrow=80, normalize=True) 
+              vutils.save_image(y,'../latents/batch_images_reversed.png', nrow=80, normalize=True) 
               
               """
               loss = x_reversed.mean()
@@ -279,31 +279,28 @@ def main():
               """
 
               #compute cos distance 
-              #loss = compute_loss(x_reversed, counterfactual_array[step]) 
+              loss = compute_loss(x_reversed, counterfactual_array[step]) 
               #print(loss) 
-              loss= y.mean()
+              #loss= y.mean()
   
               loss.backward() 
 
               print("MATTO")
+              print(loss)
   
               opt.step()
 
               image = y.detach().clone()
 
+            """
             # Verify gradients 
             for name, param in model.named_parameters(): 
                 if param.grad is not None: 
                     print(f'Parameter {name}: Gradients exist') 
                 else: 
-                    print(f'Parameter {name}: No gradients')
- 
+                    print(f'Parameter {name}: No gradients') 
             """
-            print(x_reversed.requires_grad) 
-            print(counterfactual_array[step].requires_grad) 
-            print(x_reversed.grad) 
-            print(counterfactual_array[step].grad) 
-            """
+
          
     save_name = "../latents/nuovi.pt" 
     th.save(model.state_dict(), save_name) 
